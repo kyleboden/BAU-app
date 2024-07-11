@@ -7,7 +7,7 @@ import setForm
 import closeForm
 
 st.set_page_config(page_title="BAU", page_icon='☀️')
-st.title(page_title + " " + page_icon)
+st.title(config.page_title + " " + config.page_icon)
 
 # --- NAVIGATION MENU ---
 selected = option_menu(
