@@ -46,6 +46,9 @@ percent_offset = ''
 #st.set_page_config(page_title="BAU", page_icon='☀️')
 #st.title(page_title + " " + page_icon)
 
+[theme]
+primaryColor="#1a0dab"
+
 # --- DROP DOWN VALUES FOR SELECTING THE PERIOD ---
 #years = [datetime.today().year, datetime.today().year + 1]
 months = list(calendar.month_name[1:])
