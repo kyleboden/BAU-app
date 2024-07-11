@@ -121,7 +121,7 @@ def close_form():
 
         "---"
 
-        config.close_comment = st.text_area("", placeholder="Leave any additional notes here ...")
+        #config.close_comment = st.text_area("", placeholder="Leave any additional notes here ...")
 
         submitted = st.form_submit_button("Submit")
         if submitted:
