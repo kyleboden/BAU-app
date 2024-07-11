@@ -1,6 +1,12 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
+cscope = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/drive'
+]
+
 creds_dict = {
     "type": st.secrets["gcp_service_account"]["type"],
     "project_id": st.secrets["gcp_service_account"]["project_id"],
@@ -11,19 +17,13 @@ creds_dict = {
     "auth_uri": st.secrets["gcp_service_account"]["auth_uri"],
     "token_uri": st.secrets["gcp_service_account"]["token_uri"],
     "auth_provider_x509_cert_url": st.secrets["gcp_service_account"]["auth_provider_x509_cert_url"],
-    "client_x509_cert_url": st.secrets["gcp_service_account"]["client_x509_cert_url"]
+    "client_x509_cert_url": st.secrets["gcp_service_account"]["client_x509_cert_url"],
+    "universe_domain": st.secrets["gcp_service_account"]["universe_domain"]
 }
 
 # Authenticate and create the service client
-creds = service_account.Credentials.from_service_account_info(creds_dict)
-client = authorize(creds)
-
-
-# Define the scope and credentials for Google Sheets API
-# --- Call under a function
-scope = ['https://www.googleapis.com/auth/spreadsheets', "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
-#creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
-#client = gspread.authorize(creds)
+creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=scope)
+client = gspread.authorize(creds)
 
 # Open the Google Sheet
 sheet = client.open('BAU Database').sheet1
