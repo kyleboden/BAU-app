@@ -17,8 +17,8 @@ def set_form():
             s.questionCSS("Time you called")
             config.set_time = st.time_input("", value=datetime.time(14, 00)).isoformat()
         # ub file uploader
-        s.questionCSS("Upload Utility Bill here")
-        ub_file = st.file_uploader(label='')
+        #s.questionCSS("Upload Utility Bill here")
+        #ub_file = st.file_uploader(label='')
 
         st.markdown(
             "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Unpaid Lead?</p>",
