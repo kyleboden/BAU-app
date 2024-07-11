@@ -2,7 +2,26 @@ import gspread
 import streamlit as st
 from oauth2client.service_account import ServiceAccountCredentials
 
-cscope = [
+required_keys = [
+    "type",
+    "project_id",
+    "private_key_id",
+    "private_key",
+    "client_email",
+    "client_id",
+    "auth_uri",
+    "token_uri",
+    "auth_provider_x509_cert_url",
+    "client_x509_cert_url",
+    "universe_domain"
+]
+
+for key in required_keys:
+    if key not in st.secrets["gcp_service_account"]:
+        raise KeyError(f"Missing key in secrets: {key}")
+
+# Define the scope and credentials for Google Sheets API
+scope = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/drive'
@@ -25,6 +44,7 @@ creds_dict = {
 # Authenticate and create the service client
 creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=scope)
 client = gspread.authorize(creds)
+
 
 # Open the Google Sheet
 sheet = client.open('BAU Database').sheet1
