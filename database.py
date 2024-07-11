@@ -1,5 +1,6 @@
 import gspread
 import streamlit as st
+from google.oauth2 import service_account
 from oauth2client.service_account import ServiceAccountCredentials
 
 if "gcp_service_account" not in st.secrets:
