@@ -13,7 +13,11 @@ sheet = database.sheet
 
 def data():
     #--- SIDEBAR ---
-    st.sidebar.header('Data Controls')
+    st.sidebar.header('C:\Users\Kyle.boden\Downloads/AMP_LOGO')
+
+    with st.sidebar.container():
+    image = Image.open(‘path of image’)
+    st.image(image, width= use_column_width=True)
 
     call_disp_filt = st.sidebar.selectbox('Call Dispositions', config.dispositions)
     states_filt = st.sidebar.multiselect('States', config.states)
