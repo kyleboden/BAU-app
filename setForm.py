@@ -58,7 +58,7 @@ def set_form():
                 placeholder="Write here"
             )
 
-        config.set_comment = st.text_area("", placeholder="Leave any additional notes for the closer here ...")
+        #config.set_comment = st.text_area("", placeholder="Leave any additional notes for the closer here ...")
 
         submitted = st.form_submit_button("Submit")
         if submitted:
@@ -67,7 +67,7 @@ def set_form():
                 st.error("Please fill in all fields before submitting.")
             else:
                 new_data = [config.set_date, config.set_time,  config.setter_name, config.cx_state, config.cx_name,
-                            config.cx_email, config.set_comment, config.unpaid_lead,]
+                            config.cx_email, config.unpaid_lead,]
                 db.upsert_email(config.cx_email, new_data)
                 config.cx_email = ''
                 st.success("Customer information saved!")
