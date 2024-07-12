@@ -55,8 +55,7 @@ def close_form():
             """,
             unsafe_allow_html=True
         )
-        if st.session_state.selected_option == 'Option 2':
-
+        if st.session_state.selected_option == 'Closed':
             close_col5, close_col6 = st.columns(2)
             with close_col5:
                 s.questionCSS("Lender")
