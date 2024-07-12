@@ -54,7 +54,12 @@ def close_form():
 
     if st.session_state.visible:
         placeholder = st.empty()
-
+        s.questionCSS("Customer's email")
+            config.cx_email = st.text_area(
+                label="",
+                height=100,
+                placeholder="Write here"
+            )
         
         "---"
         
@@ -116,12 +121,7 @@ def close_form():
             unsafe_allow_html=True
         )
         config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
-    s.questionCSS("Customer's email")
-        config.cx_email = st.text_area(
-            label="",
-            height=100,
-            placeholder="Write here"
-        )
+
     close_col7, close_col8 = st.columns(2)
     
     with close_col7:
