@@ -92,7 +92,7 @@ def data():
     plt.ylabel('Total Appointments')
     plt.title('Total Appointments by Disposition')
     plt.tight_layout()
-    plt.show()
+    st.pyplot(plt)
 
 
     
