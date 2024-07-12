@@ -7,10 +7,8 @@ import config
 
 def close_form():
     st.header("This form is to be filled out after every appointment that you have, whether they answered or not.")
-    
-    # Define the form
     with st.form("entry_form", clear_on_submit=True):
-        close_col1, close_col2 = st.columns([2, 3])
+        close_col1, close_col2 = st.columns([2,3])
         with close_col1:
             s.questionCSS("Date you called")
             config.close_date = st.date_input("", value=datetime.date.today()).isoformat()
@@ -32,12 +30,9 @@ def close_form():
             )
         with close_col4:
             s.questionCSS("Call Disposition")
-            disposition_options = config.dispositions
             config.closer_disp = st.selectbox(
                 '',
-                disposition_options,
-                key='disposition_select',
-                on_change=lambda: st.experimental_rerun()  # Re-run on change
+                config.dispositions
             )
 
         s.questionCSS("Customer's email")
@@ -57,77 +52,76 @@ def close_form():
             unsafe_allow_html=True
         )
 
-        # Display additional fields if "Closed" is selected
-        if st.session_state.get('disposition_select') == "Closed":
-            close_col5, close_col6 = st.columns(2)
-            with close_col5:
-                s.questionCSS("Lender")
-                config.lender = st.selectbox(
-                    '',
-                    config.lenders,
-                    key='lender',
-                )
-                s.questionCSS("System Size")
-                config.syst_size = st.number_input(
-                    '',
-                    key='syst_size'
-                )
-            with close_col6:
-                s.questionCSS("Loan/CASH/PPA")
-                config.purch_pref = st.selectbox(
-                    '',
-                    config.purch_prefs,
-                    key='purch_pref'
-                )
-                s.questionCSS("Sold PPW")
-                config.sold_ppw = st.number_input(
-                    '',
-                    key='sold_ppw'
-                )
+        close_col5, close_col6 = st.columns(2)
+        with close_col5:
+            s.questionCSS("Lender")
+            config.lender = st.selectbox(
+                '',
+                config.lenders,
+                key='lender',
+            )
+            s.questionCSS("System Size")
+            config.syst_size = st.number_input(
+                '',
+                key='syst_size'
+            )
+        with close_col6:
+            s.questionCSS("Loan/CASH/PPA")
+            config.purch_pref = st.selectbox(
+                '',
+                config.purch_prefs,
+                key='purch_pref'
+            )
+            s.questionCSS("Sold PPW")
+            config.sold_ppw = st.number_input(
+                '',
+                key='sold_ppw'
+            )
+        # Centering the 'Loan amount $' label
+        loan_amount_html = """
+        <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
+            <label style='font-size: 17px; font-family: Arial, sans-serif;'>Loan amount $</label>
+        </div>
+        """
+        st.markdown(loan_amount_html, unsafe_allow_html=True)
+        config.loan_amount = st.number_input('')
 
-            # Centering the 'Loan amount $' label
-            loan_amount_html = """
-            <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
-                <label style='font-size: 17px; font-family: Arial, sans-serif;'>Loan amount $</label>
-            </div>
-            """
-            st.markdown(loan_amount_html, unsafe_allow_html=True)
-            config.loan_amount = st.number_input('')
+        percent_offset_html = """
+        <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
+            <label style='font-size: 17px; font-family: Arial, sans-serif;'>Percent Offset %</label>
+        </div>
+        """
+        st.markdown(percent_offset_html, unsafe_allow_html=True)
+        config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
 
-            percent_offset_html = """
-            <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
-                <label style='font-size: 17px; font-family: Arial, sans-serif;'>Percent Offset %</label>
-            </div>
-            """
-            st.markdown(percent_offset_html, unsafe_allow_html=True)
-            config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
+        close_col7, close_col8 = st.columns(2)
+        # Applying the same formatting as other labels for checkboxes
 
-            close_col7, close_col8 = st.columns(2)
-            with close_col7:
-                st.markdown(
-                    "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
-                    unsafe_allow_html=True)
-                config.lock_close = st.checkbox('', key='lock_close')
-                st.markdown(
-                    "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
-                    unsafe_allow_html=True)
-                config.vid_call = st.checkbox('', key='vid_call')
+        with close_col7:
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
+                unsafe_allow_html=True)
+            config.lock_close = st.checkbox('', key='lock_close')
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
+                unsafe_allow_html=True)
+            config.vid_call = st.checkbox('', key='vid_call')
 
-            with close_col8:
-                st.markdown(
-                    "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
-                    unsafe_allow_html=True)
-                config.both_spouses = st.checkbox('', key='both_spouses')
+        # Creating centered checkboxes for close_col6
+        with close_col8:
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
+                unsafe_allow_html=True)
+            config.both_spouses = st.checkbox('', key='both_spouses')
 
-                st.markdown(
-                    "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
-                    unsafe_allow_html=True)
-                config.had_UB = st.checkbox('', key='had_UB')
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
+                unsafe_allow_html=True)
+            config.had_UB = st.checkbox('', key='had_UB')
 
-            "---"
+        "---"
 
-        # Add the common field for additional notes
-        config.close_comment = st.text_area("", placeholder="Leave any additional notes here ...")
+        #config.close_comment = st.text_area("", placeholder="Leave any additional notes here ...")
 
         submitted = st.form_submit_button("Submit")
         if submitted:
@@ -145,7 +139,7 @@ def close_form():
                     db.upsert_email(config.cx_email, new_data)
                     st.success("Customer information saved!")
                     st.rerun()
-            elif config.closer_disp == "We didn't call":
+            if config.closer_disp == "We didn't call":
                 new_data = [config.set_date, config.set_time, config.setter_name, config.cx_state, config.cx_name,
                                 config.cx_email, config.set_comment, config.unpaid_lead, config.close_date, '', '',
                                 config.closer_name, config.closer_disp, config.lender, config.syst_size, config.purch_pref,
