@@ -85,7 +85,8 @@ def data():
 #Setter bar chart
     if not call_disp_filt:
         st.subheader("Total Appointments by Setter")
-    st.subheader(f"Total Appointments and {call_disp_filt} by Setter")
+    else:
+        st.subheader(f"Total Appointments and {call_disp_filt} by Setter")
     setter_counts = df_call_filt['Setter Name'].value_counts().reset_index()
     setter_counts.columns = ['Setter Name', 'Total Appointments']
     y_pos = np.arange(len(setter_counts))
@@ -102,7 +103,8 @@ def data():
  #Closer Bar chart
     if not call_disp_filt:
         st.subheader("Total Appointments by Closer")
-    st.subheader(f"Total Appointments and {call_disp_filt} by Closer")
+    else:    
+        st.subheader(f"Total Appointments and {call_disp_filt} by Closer")
     closer_counts = df_call_filt['Closer Name'].value_counts().reset_index()
     closer_counts.columns = ['Closer Name', 'Total Appointments']
     y_pos = np.arange(len(closer_counts))
