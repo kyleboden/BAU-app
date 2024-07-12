@@ -7,8 +7,9 @@ import config
 
 def close_form():
     st.header("This form is to be filled out after every appointment that you have, whether they answered or not.")
+    
     with st.form("entry_form", clear_on_submit=True):
-        close_col1, close_col2 = st.columns([2,3])
+        close_col1, close_col2 = st.columns([2, 3])
         with close_col1:
             s.questionCSS("Date you called")
             config.close_date = st.date_input("", value=datetime.date.today()).isoformat()
@@ -32,7 +33,8 @@ def close_form():
             s.questionCSS("Call Disposition")
             config.closer_disp = st.selectbox(
                 '',
-                config.dispositions
+                config.dispositions,
+                key='disposition_select'  # Key to ensure the dropdown selection updates correctly
             )
 
         s.questionCSS("Customer's email")
@@ -52,8 +54,8 @@ def close_form():
             unsafe_allow_html=True
         )
 
-        # Conditional rendering of fields based on Call Disposition
-        if config.closer_disp == "Closed":
+        # Check the current disposition and set a flag to show fields conditionally
+        if st.session_state.get('disposition_select') == "Closed":
             close_col5, close_col6 = st.columns(2)
             with close_col5:
                 s.questionCSS("Lender")
@@ -108,7 +110,6 @@ def close_form():
                     unsafe_allow_html=True)
                 config.vid_call = st.checkbox('', key='vid_call')
 
-            # Creating centered checkboxes for close_col6
             with close_col8:
                 st.markdown(
                     "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
