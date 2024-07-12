@@ -17,8 +17,8 @@ def data():
     
     call_disp_filt = st.sidebar.selectbox('Call Dispositions', config.dispositions)
     states_filt = st.sidebar.multiselect('States', config.states)
-    setter_filt = st.sidebar.selectbox('Setter', config.setters)
-    closer_filt = st.sidebar.selectbox('Closer', config.closers)
+    setter_filt = st.sidebar.multiselect('Setter', config.setters)
+    closer_filt = st.sidebar.multiselect('Closer', config.closers)
     df = pd.DataFrame(sheet.get_all_records())
 
     st.title("My Streamlit Dashboard")
@@ -32,6 +32,10 @@ def data():
         df_call_filt = df.copy()
     if call_disp_filt != '':
         df_call_filt = df_call_filt[df_call_filt['Closer Disposition'] == call_disp_filt]
+    if setter_filt:
+        df_call_filt = df_call_filt[df_call_filt['Setter Name'].isin(setter_filt)]
+    if closer_filt:
+        df_call_filt = df_call_filt[df_call_filt['Closer Name'].isin(closer_filt)]
         
     # Calculate total appointments per state
     state_counts = df_call_filt.groupby('State').size().reset_index(name='Total Appts')
