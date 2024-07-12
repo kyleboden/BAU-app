@@ -29,6 +29,8 @@ def data():
     # Calculate filtered appointments per state based on filters
     if states_filt:
         df_call_filt = df[df['State'].isin(states_filt)]
+    else:
+        df_call_filt = df.copy()
     if call_disp_filt != '':
         df_call_filt = df_call_filt[df_call_filt['Closer Disposition'] == call_disp_filt]
     
