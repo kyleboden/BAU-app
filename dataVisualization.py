@@ -21,10 +21,7 @@ def data():
     st.title("My Streamlit Dashboard")
 
     # Connecting filters to data
-    st.subheader("Pie Chart")
-
-    
-
+      
     # Calculate filtered appointments per state based on filters
     if states_filt:
         df_call_filt = df[df['State'].isin(states_filt)]
@@ -35,32 +32,24 @@ def data():
         
     # Calculate total appointments per state
     state_counts = df_call_filt.groupby('State').size().reset_index(name='Total Appts')
-
-
     state_filtered_deals = df_call_filt.groupby('State').size().reset_index(name=call_disp_filt)
 
 
-    # Donut chart for filtered appointments per state
     if call_disp_filt == '' and not states_filt:
-        donut_data = state_counts #objects
-        donut_theta = 'Total Appts'
+        data = state_counts #objects
+        theta = 'Total Appts'
     else:
-        donut_data = state_filtered_deals #objects
-        donut_theta = call_disp_filt
+        data = state_filtered_deals #objects
+        theta = call_disp_filt
 
-    donut_data = donut_data.sort_values(by=donut_theta, ascending=False)
-    plost.donut_chart(
-        data=donut_data,
-        theta=donut_theta,
-        color='State',
-        use_container_width=True
-    )
+    data = data.sort_values(by=theta, ascending=False)
+
 
     # Bar chart to show appointments per state
-    y_pos = np.arange(len(donut_data))
+    y_pos = np.arange(len(data))
     plt.figure(figsize=(12, 10))
-    plt.bar(y_pos, donut_data[donut_theta], color='#00a7e1')
-    plt.xticks(y_pos, donut_data['State'], rotation=45, fontsize = 12)  # Set x-ticks
+    plt.bar(y_pos, data[theta], color='#00a7e1')
+    plt.xticks(y_pos, data['State'], rotation=45, fontsize = 12)  # Set x-ticks
     plt.xlabel('State', fontsize = 14)
     plt.ylabel('Total Appointments', fontsize = 14)
 
