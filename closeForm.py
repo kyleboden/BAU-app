@@ -52,6 +52,7 @@ def close_form():
             unsafe_allow_html=True
         )
 
+        # Conditional rendering of fields based on Call Disposition
         if config.closer_disp == "Closed":
             close_col5, close_col6 = st.columns(2)
             with close_col5:
@@ -121,7 +122,8 @@ def close_form():
 
             "---"
 
-        #config.close_comment = st.text_area("", placeholder="Leave any additional notes here ...")
+        # Add the common field for additional notes
+        config.close_comment = st.text_area("", placeholder="Leave any additional notes here ...")
 
         submitted = st.form_submit_button("Submit")
         if submitted:
@@ -139,7 +141,7 @@ def close_form():
                     db.upsert_email(config.cx_email, new_data)
                     st.success("Customer information saved!")
                     st.rerun()
-            if config.closer_disp == "We didn't call":
+            elif config.closer_disp == "We didn't call":
                 new_data = [config.set_date, config.set_time, config.setter_name, config.cx_state, config.cx_name,
                                 config.cx_email, config.set_comment, config.unpaid_lead, config.close_date, '', '',
                                 config.closer_name, config.closer_disp, config.lender, config.syst_size, config.purch_pref,
@@ -161,4 +163,3 @@ def close_form():
                     db.upsert_email(config.cx_email, new_data)
                     st.success("Customer information saved!")
                     st.rerun()
-
