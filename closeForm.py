@@ -33,7 +33,30 @@ def close_form():
         with close_sub_col2:
             s.questionCSS("Did you call on time?")
             config.on_time = st.radio("", ['Yes', 'No'])
-    
+    close_col7, close_col8 = st.columns(2)
+        with close_col7:
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
+                unsafe_allow_html=True)
+            config.lock_close = st.checkbox('', key='lock_close')
+            
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
+                unsafe_allow_html=True)
+            config.vid_call = st.checkbox('', key='vid_call')
+        
+        with close_col8:
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
+                unsafe_allow_html=True)
+            config.both_spouses = st.checkbox('', key='both_spouses')
+            
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
+                unsafe_allow_html=True)
+            config.had_UB = st.checkbox('', key='had_UB')
+        
+        "---"
     close_col3, close_col4 = st.columns(2)
     
     with close_col3:
@@ -62,31 +85,8 @@ def close_form():
         )
         
         "---"
-        close_col7, close_col8 = st.columns(2)
         
-        with close_col7:
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
-                unsafe_allow_html=True)
-            config.lock_close = st.checkbox('', key='lock_close')
-            
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
-                unsafe_allow_html=True)
-            config.vid_call = st.checkbox('', key='vid_call')
-        
-        with close_col8:
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
-                unsafe_allow_html=True)
-            config.both_spouses = st.checkbox('', key='both_spouses')
-            
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
-                unsafe_allow_html=True)
-            config.had_UB = st.checkbox('', key='had_UB')
-        
-        "---"
+
         
         st.markdown(
             """
