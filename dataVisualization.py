@@ -31,9 +31,7 @@ def data():
         df_call_filt = df[df['State'].isin(states_filt)]
     if call_disp_filt != '':
         df_call_filt = df_call_filt[df_call_filt['Closer Disposition'] == call_disp_filt]
-    else:
-        df_call_filt = df_call_filt.copy()  # Use entire dataset if no call disposition filter applied
-
+    
 
 
     state_filtered_deals = df_call_filt.groupby('State').size().reset_index(name=call_disp_filt)
