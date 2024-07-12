@@ -10,6 +10,7 @@ def update_visibility():
         st.session_state.visible = True
     else:
         st.session_state.visible = False
+    st.experimental_rerun()
 
 def close_form():
     if 'visible' not in st.session_state:
