@@ -67,7 +67,7 @@ def data():
 
     plt.tight_layout()
     st.pyplot(plt)
-
+    plt.close() 
 
 
     disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
