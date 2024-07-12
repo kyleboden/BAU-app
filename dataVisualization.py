@@ -65,7 +65,7 @@ def data():
     st.pyplot(plt)
     plt.close()  # Close the figure to prevent overlapping
 
-    disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
+    disp_percent(state_filtered_deals, state_counts, call_disp_filt, state_filtered_deals)
 
     # Bar chart to show different disps
     disp_counts = df_call_filt['Closer Disposition'].value_counts().reset_index()
