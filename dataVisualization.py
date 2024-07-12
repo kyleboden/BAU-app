@@ -76,7 +76,7 @@ def data():
 
     with set_col12:
         #if call_disp_filt:
-        disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
+        disp_percent(df_call_filt, state_counts if not states_filt else state_filtered_deals, call_disp_filt, state_filtered_deals)
     
     #bar chart to show different disps
     
