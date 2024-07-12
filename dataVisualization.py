@@ -53,7 +53,7 @@ def data():
     )
 
     #bar chart to show appointments per state
-    plot_bar_chart(state_counts, call_disp_filt, states_filt)
+    plt.bar(donut_data, donut_theta = 'Total Appts', color='skyblue')
 
 
     
@@ -63,24 +63,6 @@ def data():
     #if call_disp_filt:
     disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
 
-def plot_bar_chart(state_counts, call_disp_filt, states_filt):
-    plt.figure(figsize=(10, 6))
-    if call_disp_filt != '':
-        # If a call disposition filter is applied
-        filtered_counts = state_counts[state_counts['State'].isin(states_filt)]
-        plt.bar(filtered_counts['State'], filtered_counts['Total Appts'], color='skyblue')
-        plt.xlabel('State')
-        plt.ylabel('Total Appointments')
-        plt.title(f'Total Appointments per State (Filtered by {call_disp_filt})')
-    else:
-        plt.bar(state_counts['State'], state_counts['Total Appts'], color='skyblue')
-        plt.xlabel('State')
-        plt.ylabel('Total Appointments')
-        plt.title('Total Appointments per State')
-
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    st.pyplot(plt)
 
 
 def disp_percent(df, counts, disp_filt, state_filt):
