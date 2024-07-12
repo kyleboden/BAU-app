@@ -53,7 +53,7 @@ def data():
     )
 
     #bar chart to show appointments per state
-    y_pos = np.arrange(len(donut_data))
+    y_pos = np.arange(len(donut_data))
     plt.bar(y_pos, color='skyblue')
     plt.show()
 
