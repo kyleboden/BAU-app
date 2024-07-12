@@ -89,16 +89,14 @@ def data():
 
     #create 2 bar charts with closer and setter names and call disps
 
-    st.subheader("Total Appointments by Setter")
-    setter_counts = df_call_filt['Setter Name'].value_counts().reset_index()
-    setter_counts.columns = ['Setter Name', 'Total Appointments']
-    y_pos = np.arange(len(setter_counts))
-    plt.figure(figsize=(12, 8))
-    plt.bar(y_pos, setter_counts['Total Appointments'], color='#00a7e1')
-    plt.xticks(y_pos, setter_counts['Setter Name'], rotation=45, fontsize=12)  # Set x-ticks to setters
+    st.subheader("Number of Each Disposition per Setter")
+    setter_disp_counts = df_call_filt.groupby(['Setter Name', 'Closer Disposition']).size().reset_index(name='Total Appointments')
+    pivot_table = setter_disp_counts.pivot(index='Setter Name', columns='Closer Disposition', values='Total Appointments').fillna(0)
+    pivot_table.plot(kind='bar', figsize=(14, 8), color=config.dispositions, colormap='tab20')
     plt.xlabel('Setter Name', fontsize=14)
     plt.ylabel('Total Appointments', fontsize=14)
-    plt.title('Total Appointments by Setter', fontsize=16)
+    plt.title('Number of Each Disposition per Setter', fontsize=16)
+    plt.xticks(rotation=45, fontsize=12)
     plt.tight_layout()
     st.pyplot(plt)
     
