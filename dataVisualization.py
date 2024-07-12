@@ -71,7 +71,7 @@ def data():
     st.pyplot(plt)
     
     test_state_filt = states_filt
-    if not state_filt:
+    if not states_filt:
         test_state_filt = config.states
 
 
