@@ -9,7 +9,7 @@ def update_visibility():
     if st.session_state.config.closer_disp == 'Closed':
         st.session_state.visible = True
     else:
-        st.session_state = False
+        st.session_state.visible = False
 
 def close_form():
     st.header("This form is to be filled out after every appointment that you have, whether they answered or not.")
