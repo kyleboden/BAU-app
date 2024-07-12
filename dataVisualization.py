@@ -75,7 +75,7 @@ def data():
     disp_counts = df_call_filt['Closer Disposition'].value_counts().reset_index()
     disp_counts.columns = ['Disposition', 'Total Appointments']
 
-    # Create a bar chart
+    # Total appointments by Disp bar chart
     y_pos = np.arange(len(disp_counts))
     plt.figure(figsize=(10, 6))
     plt.bar(y_pos, disp_counts['Total Appointments'], color='#00a7e1')
