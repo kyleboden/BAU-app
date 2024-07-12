@@ -26,10 +26,9 @@ def data():
     # Connecting filters to data
       
     # Calculate filtered appointments per state based on filters
+    df_call_filt = df.copy()
     if states_filt:
         df_call_filt = df[df['State'].isin(states_filt)]
-    else:
-        df_call_filt = df.copy()
     if call_disp_filt:
         df_call_filt = df_call_filt[df_call_filt['Closer Disposition'].isin(call_disp_filt)]
     if setter_filt:
@@ -89,23 +88,6 @@ def data():
     st.pyplot(plt)
 
     #create 2 bar charts with closer and setter names and call disps
-
-    if call_disp_filt == '':
-        st.subheader("Number of Each Disposition per Setter")
-        setter_disp_counts = df_call_filt.groupby(['Setter Name', 'Closer Disposition']).size().unstack(fill_value=0)
-
-        # Plotting
-        ax = setter_disp_counts.plot(kind='bar', figsize=(14, 8), color=config.colors, width=0.8)
-        plt.xlabel('Setter Name', fontsize=14)
-        plt.ylabel('Number of Appointments', fontsize=14)
-        plt.title('Number of Each Disposition per Setter', fontsize=16)
-        plt.xticks(rotation=45, fontsize=12)
-        plt.yticks(fontsize=12)
-        plt.legend(title='Disposition', title_fontsize='13', fontsize='12')
-        plt.tight_layout()
-        st.pyplot(plt)
-
-    # Create bar charts with setter and closer names if applicable
 
     
     #if closer_filt:
