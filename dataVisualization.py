@@ -77,8 +77,8 @@ def data():
 
     with set_col12:
         #if call_disp_filt:
-        disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
-    
+        #disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
+        disp_percent(df_call_filt, state_counts)
     #bar chart to show different disps
     
 
@@ -86,19 +86,7 @@ def data():
 
 
 
-def disp_percent(df, counts, disp_filt, state_filt):
-    if disp_filt == '' and state_filt.empty:
-        # If no filter is selected, display a simplified dataframe
-        simplified_df = counts.copy()
-        simplified_df['Total Appts'] = counts['Total Appts'].astype(int)
-        totals_row = pd.DataFrame({'State': 'Total', 'Total Appts': counts['Total Appts'].sum()}, index=[0])
-        simplified_df = pd.concat([simplified_df, totals_row], ignore_index=True)
-
-        # Display the simplified dataframe
-        st.write("Total Appts for each State:")
-        st.table(simplified_df.set_index('State'))
-
-        return
+def disp_percent(df, counts):
 
     merged_df = pd.merge(counts, state_filt, on='State', how='left')  # Merge total and filtered deals dfs
 
