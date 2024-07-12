@@ -52,14 +52,14 @@ def close_form():
             on_change=update_visibility
         )
     
-    if st.session_state.visible:
-        placeholder = st.empty()
-        s.questionCSS("Customer's email")
-        config.cx_email = st.text_area(
-            label="",
-            height=100,
-            placeholder="Write here"
-        )
+if st.session_state.visible:
+    placeholder = st.empty()
+    s.questionCSS("Customer's email")
+    config.cx_email = st.text_area(
+        label="",
+        height=100,
+        placeholder="Write here"
+    )
         
         "---"
         
