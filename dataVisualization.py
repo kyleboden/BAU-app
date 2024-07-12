@@ -82,6 +82,21 @@ def data():
     st.pyplot(plt)
     plt.close()  # Close the figure to prevent overlapping
 
+#Setter bar chart
+    st.subheader("Total Appointments by Setter")
+    setter_counts = df_call_filt['Setter Name'].value_counts().reset_index()
+    setter_counts.columns = ['Setter Name', 'Total Appointments']
+    y_pos = np.arange(len(setter_counts))
+    plt.figure(figsize=(12, 8))
+    plt.bar(y_pos, setter_counts['Total Appointments'], color='#00a7e1')
+    plt.xticks(y_pos, setter_counts['Setter Name'], rotation=45, fontsize=12)  # Set x-ticks to setters
+    plt.xlabel('Setter Name', fontsize=14)
+    plt.ylabel('Total Appointments', fontsize=14)
+    plt.title('Total Appointments by Setter', fontsize=16)
+    plt.tight_layout()
+    st.pyplot(plt)
+
+
     # TODO: Add a tab to see which names are missing the closer form
 
 def disp_percent(df, counts, disp_filt, state_filt):
