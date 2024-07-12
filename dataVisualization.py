@@ -53,13 +53,8 @@ def data():
     )
 
     #bar chart to show appointments per state
-    st.subheader("Bar Chart")
-    fig, ax = plt.subplots()
-    ax.bar(state_counts['State'], state_counts['Total Appts'])
-    ax.set_xlabel('State')
-    ax.set_ylabel('Total Appointments')
-    ax.set_title('Total Appointments per State')
-    st.pyplot(fig)
+    plot_bar_chart(state_counts, call_disp_filt, states_filt)
+
 
     
     #bar chart to show different disps
@@ -67,6 +62,26 @@ def data():
 
     #if call_disp_filt:
     disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
+
+def plot_bar_chart(state_counts, call_disp_filt, states_filt):
+    plt.figure(figsize=(10, 6))
+    if call_disp_filt != '':
+        # If a call disposition filter is applied
+        filtered_counts = state_counts[state_counts['State'].isin(states_filt)]
+        plt.bar(filtered_counts['State'], filtered_counts['Total Appts'], color='skyblue')
+        plt.xlabel('State')
+        plt.ylabel('Total Appointments')
+        plt.title(f'Total Appointments per State (Filtered by {call_disp_filt})')
+    else:
+        plt.bar(state_counts['State'], state_counts['Total Appts'], color='skyblue')
+        plt.xlabel('State')
+        plt.ylabel('Total Appointments')
+        plt.title('Total Appointments per State')
+
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    st.pyplot(plt)
+
 
 def disp_percent(df, counts, disp_filt, state_filt):
     if disp_filt == '':
