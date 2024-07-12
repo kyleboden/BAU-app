@@ -42,7 +42,7 @@ def data():
     state_filtered_deals = df_call_filt.groupby('State').size().reset_index(name=call_disp_filt)
 
 
-    if call_disp_filt == '' and not states_filt:
+    if call_disp_filt == '' and not states_filt and not setter_filt and not closer_filt:
         data = state_counts #objects
         theta = 'Total Appts'
     else:
@@ -69,7 +69,7 @@ def data():
     plt.tight_layout()
     st.pyplot(plt)
 
-    #if call_disp_filt:
+
     disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
     
     #bar chart to show different disps
@@ -87,7 +87,19 @@ def data():
     plt.tight_layout()
     st.pyplot(plt)
 
-
+    #create 2 bar charts with closer and setter names and call disps
+    if setter_filt:
+    y_pos = np.arange(len(disp_counts))
+    plt.figure(figsize=(10, 6))
+    plt.bar(y_pos, disp_counts['Total Appointments'], color='#00a7e1')
+    plt.xticks(y_pos, data['Setter Name'], rotation=45)  # Set x-ticks to dispositions
+    plt.xlabel('Dispositions')
+    plt.ylabel('Total Appointments')
+    plt.title('Total Appointments by Disposition')
+    plt.tight_layout()
+    st.pyplot(plt)
+    
+    if closer_filt:
     
 
 
