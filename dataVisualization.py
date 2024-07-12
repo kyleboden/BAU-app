@@ -14,8 +14,11 @@ sheet = database.sheet
 def data():
     #--- SIDEBAR ---
 
+    
     call_disp_filt = st.sidebar.selectbox('Call Dispositions', config.dispositions)
     states_filt = st.sidebar.multiselect('States', config.states)
+    setter_filt = st.sidebar.selectbox('Setter', config.setters)
+    closer_filt = st.sidebar.selectbox('Closer', config.closers)
     df = pd.DataFrame(sheet.get_all_records())
 
     st.title("My Streamlit Dashboard")
