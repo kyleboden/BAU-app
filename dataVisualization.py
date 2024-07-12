@@ -76,7 +76,9 @@ def data():
 
 
     disp_percent(df_call_filt, state_counts, test_disp_filt, state_filtered_deals)
-    
+    print("Counts columns:", counts.columns)
+    print("State Filt columns:", state_filt.columns)
+    print("Disp Filt:", disp_filt)
     #bar chart to show different disps
     disp_counts = df_call_filt['Closer Disposition'].value_counts().reset_index()
     disp_counts.columns = ['Disposition', 'Total Appointments']
