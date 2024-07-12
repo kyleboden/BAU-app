@@ -83,7 +83,7 @@ def data():
     plt.close()  # Close the figure to prevent overlapping
 
 #Setter bar chart
-    st.subheader("Total Appointments and {call_disp_filt} by Setter")
+    st.subheader(f"Total Appointments and {call_disp_filt} by Setter")
     setter_counts = df_call_filt['Setter Name'].value_counts().reset_index()
     setter_counts.columns = ['Setter Name', 'Total Appointments']
     y_pos = np.arange(len(setter_counts))
@@ -97,13 +97,13 @@ def data():
     st.pyplot(plt)
     plt.close()
  #Closer Bar chart
-    st.subheader("Total Appointments and {call_disp_filt} by Closer")
+    st.subheader(f"Total Appointments and {call_disp_filt} by Closer")
     closer_counts = df_call_filt['Closer Name'].value_counts().reset_index()
     closer_counts.columns = ['Closer Name', 'Total Appointments']
     y_pos = np.arange(len(closer_counts))
     plt.figure(figsize=(12, 8))
     plt.bar(y_pos, closer_counts['Total Appointments'], color='#00a7e1')
-    plt.xticks(y_pos, setter_counts['Closer Name'], rotation=45, fontsize=12)  # Set x-ticks to setters
+    plt.xticks(y_pos, closer_counts['Closer Name'], rotation=45, fontsize=12)  # Set x-ticks to setters
     plt.xlabel('Closer Name', fontsize=14)
     plt.ylabel('Total Appointments', fontsize=14)
     plt.title('Total Appointments by Closer', fontsize=16)
