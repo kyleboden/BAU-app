@@ -51,15 +51,15 @@ def close_form():
             key='closer_disp',
             on_change=update_visibility
         )
-
+    
     if st.session_state.visible:
         placeholder = st.empty()
         s.questionCSS("Customer's email")
-            config.cx_email = st.text_area(
-                label="",
-                height=100,
-                placeholder="Write here"
-            )
+        config.cx_email = st.text_area(
+            label="",
+            height=100,
+            placeholder="Write here"
+        )
         
         "---"
         
@@ -121,7 +121,7 @@ def close_form():
             unsafe_allow_html=True
         )
         config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
-
+        
     close_col7, close_col8 = st.columns(2)
     
     with close_col7:
@@ -145,8 +145,8 @@ def close_form():
             "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
             unsafe_allow_html=True)
         config.had_UB = st.checkbox('', key='had_UB')
-    
-    "---"
+        
+        "---"
     
     with st.form("entry_form", clear_on_submit=True):
         st.session_state.submitted = st.form_submit_button("Submit")
