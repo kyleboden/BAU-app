@@ -62,6 +62,31 @@ def close_form():
         )
         
         "---"
+        close_col7, close_col8 = st.columns(2)
+        
+        with close_col7:
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
+                unsafe_allow_html=True)
+            config.lock_close = st.checkbox('', key='lock_close')
+            
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
+                unsafe_allow_html=True)
+            config.vid_call = st.checkbox('', key='vid_call')
+        
+        with close_col8:
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
+                unsafe_allow_html=True)
+            config.both_spouses = st.checkbox('', key='both_spouses')
+            
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
+                unsafe_allow_html=True)
+            config.had_UB = st.checkbox('', key='had_UB')
+        
+        "---"
         
         st.markdown(
             """
@@ -122,31 +147,7 @@ def close_form():
         )
         config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
         
-        close_col7, close_col8 = st.columns(2)
         
-        with close_col7:
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
-                unsafe_allow_html=True)
-            config.lock_close = st.checkbox('', key='lock_close')
-            
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
-                unsafe_allow_html=True)
-            config.vid_call = st.checkbox('', key='vid_call')
-        
-        with close_col8:
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
-                unsafe_allow_html=True)
-            config.both_spouses = st.checkbox('', key='both_spouses')
-            
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
-                unsafe_allow_html=True)
-            config.had_UB = st.checkbox('', key='had_UB')
-        
-        "---"
     
     with st.form("entry_form", clear_on_submit=True):
         st.session_state.submitted = st.form_submit_button("Submit")
