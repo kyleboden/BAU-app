@@ -83,6 +83,8 @@ def data():
     plt.close()  # Close the figure to prevent overlapping
 
 #Setter bar chart
+    if not call_disp_filt:
+        st.subheader("Total Appointments by Setter")
     st.subheader(f"Total Appointments and {call_disp_filt} by Setter")
     setter_counts = df_call_filt['Setter Name'].value_counts().reset_index()
     setter_counts.columns = ['Setter Name', 'Total Appointments']
@@ -96,7 +98,10 @@ def data():
     plt.tight_layout()
     st.pyplot(plt)
     plt.close()
+    
  #Closer Bar chart
+    if not call_disp_filt:
+        st.subheader("Total Appointments by Closer")
     st.subheader(f"Total Appointments and {call_disp_filt} by Closer")
     closer_counts = df_call_filt['Closer Name'].value_counts().reset_index()
     closer_counts.columns = ['Closer Name', 'Total Appointments']
@@ -112,7 +117,6 @@ def data():
     plt.close()
 
     # TODO: Add a tab to see which names are missing the closer form
-
 def disp_percent(df, counts, disp_filt, state_filt):
     if not disp_filt:
         # If no filter is selected, display a simplified dataframe
