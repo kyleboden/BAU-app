@@ -38,7 +38,7 @@ def close_form():
         config.closer_disp = st.selectbox(
             '',
             config.dispositions,
-            on_change = visibility
+            on_change = update_visibility
         )
     placeholder = st.empty()
     if st.session_state.visible:
