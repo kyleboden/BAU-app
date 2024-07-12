@@ -127,8 +127,9 @@ def disp_percent(df, counts, disp_filt, state_filt):
         totals_row = pd.DataFrame({'State': ['Total'], 'Total Appts': [counts['Total Appts'].sum()]})
         simplified_df = pd.concat([simplified_df, totals_row], ignore_index=True)
 
-        # Sort the simplified DataFrame by 'Total Appts'
-        simplified_df = simplified_df.sort_values(by='Total Appts', ascending=False)
+        # Sort the simplified DataFrame by 'Total Appts' in descending order, keeping the 'Total' row at the bottom
+        simplified_df = simplified_df.sort_values(by='Total Appts', ascending=False, ignore_index=True)
+        simplified_df.loc[simplified_df['State'] == 'Total', 'Total Appts'] = simplified_df['Total Appts'].sum()
 
         # Display the simplified dataframe
         st.write("Total Appts for each State:")
@@ -155,9 +156,12 @@ def disp_percent(df, counts, disp_filt, state_filt):
     # Append totals row to the DataFrame
     merged_df = pd.concat([merged_df, totals_row], ignore_index=True)
 
-    # Sort the DataFrame by 'Total Appts' in descending order
-    merged_df = merged_df.sort_values(by='Total Appts', ascending=False)
+    # Sort the DataFrame by 'Total Appts' in descending order, keeping the 'Total' row at the bottom
+    sorted_df = merged_df.sort_values(by='Total Appts', ascending=False, ignore_index=True)
+    sorted_df.loc[sorted_df['State'] == 'Total', 'Total Appts'] = merged_df['Total Appts'].sum()
+    sorted_df.loc[sorted_df['State'] == 'Total', 'Filtered Deals'] = merged_df['Filtered Deals'].sum()
+    sorted_df.loc[sorted_df['State'] == 'Total', 'Percent'] = totals_row['Percent'].values[0]
 
     # Display the merged dataframe
     st.write(f"Total and {disp_filt} with Percent for each State:")
-    st.table(merged_df.set_index('State'))
+    st.table(sorted_df.set_index('State'))
