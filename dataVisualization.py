@@ -45,6 +45,8 @@ def data():
     else:
         donut_data = state_filtered_deals #objects
         donut_theta = call_disp_filt
+
+    donut_data = donut_data.sort_values(by=donut_theta, ascending=False)
     plost.donut_chart(
         data=donut_data,
         theta=donut_theta,
@@ -56,10 +58,15 @@ def data():
     y_pos = np.arange(len(donut_data))
     plt.figure(figsize=(10, 6))
     plt.bar(y_pos, donut_data[donut_theta], color='skyblue')
-    #plt.xticks(y_pos, donut_data['State'], rotation=45)
+    plt.xticks(y_pos, donut_data['State'], rotation=45)  # Set x-ticks
     plt.xlabel('State')
     plt.ylabel('Total Appointments')
-    plt.title('Total Appointments per State')
+    if call_disp_filt:
+        title = f'Total {call_disp_filt} Appointments per State'
+    else:
+        title = 'Total Appointments per State'
+    plt.title(title)
+
     plt.tight_layout()
     st.pyplot(plt)
     
