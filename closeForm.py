@@ -6,16 +6,15 @@ import settings as s
 import config
 
 def update_visibility():
-    if config.closer_disp == 'Closed':
+    if st.session_state.closer_disp == 'Closed':
         st.session_state.visible = True
     else:
         st.session_state.visible = False
-    st.experimental_rerun()
 
 def close_form():
     if 'visible' not in st.session_state:
         st.session_state.visible = False
-
+    
     st.header("This form is to be filled out after every appointment that you have, whether they answered or not.")
     
     close_col1, close_col2 = st.columns([2, 3])
@@ -49,6 +48,7 @@ def close_form():
         config.closer_disp = st.selectbox(
             '',
             config.dispositions,
+            key='closer_disp',
             on_change=update_visibility
         )
     
@@ -199,6 +199,3 @@ def close_form():
                 db.upsert_email(config.cx_email, new_data)
                 st.success("Customer information saved!")
                 st.experimental_rerun()
-
-if __name__ == '__main__':
-    close_form()
