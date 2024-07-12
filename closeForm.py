@@ -1,5 +1,6 @@
 import datetime  # Core Python Module
 import streamlit as st  # pip install streamlit
+import streamlit.session_state as ss
 
 import database as db
 import settings as s
@@ -30,14 +31,12 @@ def close_form():
             )
         with close_col4:
             s.questionCSS("Call Disposition")
-            selected_option = st.selectbox(
+            config.closer_disp = st.selectbox(
                 '',
                 config.dispositions
             )
-            config.closer_disp = selected_option
 
 
-        st.session_state.config.selected_option = selected_option
 
         s.questionCSS("Customer's email")
         config.cx_email = st.text_area(
@@ -55,75 +54,79 @@ def close_form():
             """,
             unsafe_allow_html=True
         )
-        if st.session_state.selected_option == 'Closed':
-            close_col5, close_col6 = st.columns(2)
-            with close_col5:
-                s.questionCSS("Lender")
-                config.lender = st.selectbox(
-                    '',
-                    config.lenders,
-                    key='lender',
-                )
-                s.questionCSS("System Size")
-                config.syst_size = st.number_input(
-                    '',
-                    key='syst_size'
-                )
-            with close_col6:
-                s.questionCSS("Loan/CASH/PPA")
-                config.purch_pref = st.selectbox(
-                    '',
-                    config.purch_prefs,
-                    key='purch_pref'
-                )
-                s.questionCSS("Sold PPW")
-                config.sold_ppw = st.number_input(
-                    '',
-                    key='sold_ppw'
-                )
-            # Centering the 'Loan amount $' label
-            loan_amount_html = """
-            <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
-                <label style='font-size: 17px; font-family: Arial, sans-serif;'>Loan amount $</label>
-            </div>
-            """
-            st.markdown(loan_amount_html, unsafe_allow_html=True)
-            config.loan_amount = st.number_input('')
+        ss.closer_disabled = True
+        if config.closer_disp == 'Closed':
+            ss.closer_disabled = False
+
+        close_col5, close_col6 = st.columns(2)
+        with close_col5:
+            s.questionCSS("Lender")
+            config.lender = st.selectbox(
+                '',
+                config.lenders,
+                key='lender',
+                disabled = ss.closer_disabled
+            )
+            s.questionCSS("System Size")
+            config.syst_size = st.number_input(
+                '',
+                key='syst_size'
+            )
+        with close_col6:
+            s.questionCSS("Loan/CASH/PPA")
+            config.purch_pref = st.selectbox(
+                '',
+                config.purch_prefs,
+                key='purch_pref'
+            )
+            s.questionCSS("Sold PPW")
+            config.sold_ppw = st.number_input(
+                '',
+                key='sold_ppw'
+            )
+        # Centering the 'Loan amount $' label
+        loan_amount_html = """
+        <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
+            <label style='font-size: 17px; font-family: Arial, sans-serif;'>Loan amount $</label>
+        </div>
+        """
+        st.markdown(loan_amount_html, unsafe_allow_html=True)
+        config.loan_amount = st.number_input('')
     
-            percent_offset_html = """
-            <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
-                <label style='font-size: 17px; font-family: Arial, sans-serif;'>Percent Offset %</label>
-            </div>
-            """
-            st.markdown(percent_offset_html, unsafe_allow_html=True)
-            config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
+        percent_offset_html = """
+        <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
+            <label style='font-size: 17px; font-family: Arial, sans-serif;'>Percent Offset %</label>
+        </div>
+        """
+        st.markdown(percent_offset_html, unsafe_allow_html=True)
+        config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
 
-        close_col7, close_col8 = st.columns(2)
-        # Applying the same formatting as other labels for checkboxes
+    close_col7, close_col8 = st.columns(2)
+    # Applying the same formatting as other labels for checkboxes
 
-        with close_col7:
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
-                unsafe_allow_html=True)
-            config.lock_close = st.checkbox('', key='lock_close')
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
-                unsafe_allow_html=True)
-            config.vid_call = st.checkbox('', key='vid_call')
+    with close_col7:
+        st.markdown(
+            "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
+            unsafe_allow_html=True)
+        config.lock_close = st.checkbox('', key='lock_close')
+        st.markdown(
+            "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
+            unsafe_allow_html=True)
+        config.vid_call = st.checkbox('', key='vid_call')
 
-        # Creating centered checkboxes for close_col6
-        with close_col8:
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
-                unsafe_allow_html=True)
-            config.both_spouses = st.checkbox('', key='both_spouses')
+    # Creating centered checkboxes for close_col6
+    with close_col8:
+        st.markdown(
+            "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
+            unsafe_allow_html=True)
+        config.both_spouses = st.checkbox('', key='both_spouses')
 
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
-                unsafe_allow_html=True)
-            config.had_UB = st.checkbox('', key='had_UB')
+        st.markdown(
+            "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
+            unsafe_allow_html=True)
+        config.had_UB = st.checkbox('', key='had_UB')
 
-        "---"
+    "---"
 
         #config.close_comment = st.text_area("", placeholder="Leave any additional notes here ...")
 
