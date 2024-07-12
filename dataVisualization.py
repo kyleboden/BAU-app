@@ -54,9 +54,14 @@ def data():
 
     #bar chart to show appointments per state
     y_pos = np.arange(len(donut_data))
-    plt.bar(y_pos, color='skyblue')
-    plt.show()
-
+    plt.figure(figsize=(10, 6))
+    plt.bar(y_pos, donut_data[donut_theta], color='skyblue')
+    plt.xticks(y_pos, donut_data['State'], rotation=45)
+    plt.xlabel('State')
+    plt.ylabel('Total Appointments')
+    plt.title('Total Appointments per State')
+    plt.tight_layout()
+    st.pyplot(plt)
     
     #bar chart to show different disps
     
