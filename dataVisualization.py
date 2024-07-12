@@ -48,15 +48,15 @@ def data():
 
     donut_data = donut_data.sort_values(by=donut_theta, ascending=False)
 
-    set_col1, set_col2 = st.columns(2)
-        with set_col1:
+    set_col11, set_col12 = st.columns(2)
+        with set_col11:
             plost.donut_chart(
                 data=donut_data,
                 theta=donut_theta,
                 color='State',
                 use_container_width=True
             )
-        with set_col2:
+        with set_col12:
             #bar chart to show appointments per state
             y_pos = np.arange(len(donut_data))
             plt.figure(figsize=(10, 6))
