@@ -59,20 +59,15 @@ def data():
     plt.xlabel('State', fontsize = 14)
     plt.ylabel('Total Appointments', fontsize = 14)
 
-    test_disp_filt = call_disp_filt
     if call_disp_filt:
         title = f'Total {call_disp_filt} Appointments per State'
     else:
         title = 'Total Appointments per State'
-        test_disp_filt = config.dispositions
     plt.title(title)
 
     plt.tight_layout()
     st.pyplot(plt)
-    
-    test_state_filt = states_filt
-    if not states_filt:
-        test_state_filt = config.states
+
 
 
     disp_percent(df_call_filt, state_counts, test_disp_filt, state_filtered_deals)
@@ -99,7 +94,7 @@ def data():
 
 
 
-def disp_percent(df, counts, disp_filt, state_filt):
+def disp_percent(df, counts, call_disp_filt, state_filt):
     if not disp_filt:
         # If no filter is selected, display a simplified dataframe
         simplified_df = counts.copy()
