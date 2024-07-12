@@ -8,6 +8,7 @@ import config
 def close_form():
     st.header("This form is to be filled out after every appointment that you have, whether they answered or not.")
     
+    # Define the form
     with st.form("entry_form", clear_on_submit=True):
         close_col1, close_col2 = st.columns([2, 3])
         with close_col1:
@@ -31,10 +32,12 @@ def close_form():
             )
         with close_col4:
             s.questionCSS("Call Disposition")
+            disposition_options = config.dispositions
             config.closer_disp = st.selectbox(
                 '',
-                config.dispositions,
-                key='disposition_select'  # Key to ensure the dropdown selection updates correctly
+                disposition_options,
+                key='disposition_select',
+                on_change=lambda: st.experimental_rerun()  # Re-run on change
             )
 
         s.questionCSS("Customer's email")
@@ -54,7 +57,7 @@ def close_form():
             unsafe_allow_html=True
         )
 
-        # Check the current disposition and set a flag to show fields conditionally
+        # Display additional fields if "Closed" is selected
         if st.session_state.get('disposition_select') == "Closed":
             close_col5, close_col6 = st.columns(2)
             with close_col5:
