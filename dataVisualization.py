@@ -77,8 +77,8 @@ def data():
 
     with set_col12:
         #if call_disp_filt:
-        #disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
-        disp_percent(df_call_filt, state_counts)
+        disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
+    
     #bar chart to show different disps
     
 
@@ -86,7 +86,7 @@ def data():
 
 
 
-def disp_percent(df, counts):
+def disp_percent(df, counts, disp_filt, state_filt):
 
     merged_df = pd.merge(counts, state_filt, on='State', how='left')  # Merge total and filtered deals dfs
 
