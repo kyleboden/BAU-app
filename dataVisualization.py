@@ -76,7 +76,7 @@ def data():
 
     with set_col12:
         #if call_disp_filt:
-        disp_percent(df_call_filt, state_counts if not states_filt else state_filtered_deals, call_disp_filt, state_filtered_deals)
+        disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
     
     #bar chart to show different disps
     
@@ -86,7 +86,7 @@ def data():
 
 
 def disp_percent(df, counts, disp_filt, state_filt):
-    if disp_filt == '':
+    if disp_filt == '' and not state_filt:
         # If no filter is selected, display a simplified dataframe
         simplified_df = counts.copy()
         simplified_df['Total Appts'] = counts['Total Appts'].astype(int)
