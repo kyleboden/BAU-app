@@ -40,10 +40,10 @@ def data():
 
     # Donut chart for filtered appointments per state
     if call_disp_filt == '':
-        donut_data = state_counts
+        donut_data = state_counts #objects
         donut_theta = 'Total Appts'
     else:
-        donut_data = state_filtered_deals
+        donut_data = state_filtered_deals #objects
         donut_theta = call_disp_filt
     plost.donut_chart(
         data=donut_data,
@@ -53,8 +53,9 @@ def data():
     )
 
     #bar chart to show appointments per state
-    plt.bar(donut_data, donut_theta = 'Total Appts', color='skyblue')
-
+    y_pos = np.arrange(len(donut_data))
+    plt.bar(y_pos, color='skyblue')
+    plt.show()
 
     
     #bar chart to show different disps
