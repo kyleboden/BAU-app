@@ -70,7 +70,7 @@ def data():
 
 
 
-    disp_percent(df_call_filt, state_counts, test_disp_filt, state_filtered_deals)
+    disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
     #bar chart to show different disps
     disp_counts = df_call_filt['Closer Disposition'].value_counts().reset_index()
     disp_counts.columns = ['Disposition', 'Total Appointments']
@@ -94,7 +94,7 @@ def data():
 
 
 
-def disp_percent(df, counts, call_disp_filt, state_filt):
+def disp_percent(df, counts, disp_filt, state_filt):
     if not disp_filt:
         # If no filter is selected, display a simplified dataframe
         simplified_df = counts.copy()
