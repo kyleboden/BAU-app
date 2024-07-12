@@ -5,19 +5,16 @@ import database as db
 import settings as s
 import config
 
-if 'visible' not in st.session_state:
-    st.session_state.visible = False
-if 'submitted' not in st.session_state:
-    st.session_state.submitted = False
-
-
 def update_visibility():
-    if st.session_state.config.closer_disp == 'Closed':
+    if config.closer_disp == 'Closed':
         st.session_state.visible = True
     else:
         st.session_state.visible = False
 
 def close_form():
+    if 'visible' not in st.session_state:
+        st.session_state.visible = False
+
     st.header("This form is to be filled out after every appointment that you have, whether they answered or not.")
     
     close_col1, close_col2 = st.columns([2, 3])
@@ -203,6 +200,4 @@ def close_form():
                 st.experimental_rerun()
 
 if __name__ == '__main__':
-    if 'visible' not in st.session_state:
-        st.session_state.visible = False
     close_form()
