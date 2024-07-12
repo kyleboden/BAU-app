@@ -72,7 +72,7 @@ def data():
             title = 'Total Appointments per State'
         plt.title(title)
 
-        #plt.tight_layout()
+        plt.tight_layout()
         st.pyplot(plt)
 
     with set_col12:
