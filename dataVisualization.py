@@ -40,7 +40,7 @@ def data():
 
 
     # Donut chart for filtered appointments per state
-    if call_disp_filt == '' and not state_filtered_deals:
+    if call_disp_filt == '' and not states_filt:
         donut_data = state_counts #objects
         donut_theta = 'Total Appts'
     else:
