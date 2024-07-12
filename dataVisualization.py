@@ -59,18 +59,19 @@ def data():
     plt.xlabel('State', fontsize = 14)
     plt.ylabel('Total Appointments', fontsize = 14)
 
+    test_disp_filt = call_disp_filt
     if call_disp_filt:
         title = f'Total {call_disp_filt} Appointments per State'
     else:
         title = 'Total Appointments per State'
-        call_disp_filt = config.dispositions
+        test_disp_filt = config.dispositions
     plt.title(title)
 
     plt.tight_layout()
     st.pyplot(plt)
 
 
-    disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
+    disp_percent(df_call_filt, state_counts, test_disp_filt, state_filtered_deals)
     
     #bar chart to show different disps
     disp_counts = df_call_filt['Closer Disposition'].value_counts().reset_index()
