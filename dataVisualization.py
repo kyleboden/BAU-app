@@ -27,13 +27,14 @@ def data():
     state_counts = df.groupby('State').size().reset_index(name='Total Appts')
 
     # Calculate filtered appointments per state based on filters
-    if call_disp_filt != '':
-        df_call_filt = df[df['Closer Disposition'] == call_disp_filt]
-    else:
-        df_call_filt = df.copy()  # Use entire dataset if no call disposition filter applied
-
     if states_filt:
-        df_call_filt = df_call_filt[df_call_filt['State'].isin(states_filt)]
+        df_call_filt = df[df['State'].isin(states_filt)]
+    if call_disp_filt != '':
+        df_call_filt = df_call_filt[df_call_filt['Closer Disposition'] == call_disp_filt]
+    else:
+        df_call_filt = df_call_filt.copy()  # Use entire dataset if no call disposition filter applied
+
+
 
     state_filtered_deals = df_call_filt.groupby('State').size().reset_index(name=call_disp_filt)
 
