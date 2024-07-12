@@ -5,7 +5,7 @@ import database as db
 import settings as s
 import config
 
-def update_visibility:
+def update_visibility():
     if st.session_state.config.closer_disp == 'Closed':
         st.session_state.visible = True
     else:
