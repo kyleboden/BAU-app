@@ -30,10 +30,14 @@ def close_form():
             )
         with close_col4:
             s.questionCSS("Call Disposition")
-            config.closer_disp = st.selectbox(
+            selected_option = st.selectbox(
                 '',
                 config.dispositions
             )
+            config.closer_disp = selected_option
+
+
+        st.session_state.config.selected_option = selected_option
 
         s.questionCSS("Customer's email")
         config.cx_email = st.text_area(
@@ -51,48 +55,49 @@ def close_form():
             """,
             unsafe_allow_html=True
         )
+        if st.session_state.selected_option == 'Option 2':
 
-        close_col5, close_col6 = st.columns(2)
-        with close_col5:
-            s.questionCSS("Lender")
-            config.lender = st.selectbox(
-                '',
-                config.lenders,
-                key='lender',
-            )
-            s.questionCSS("System Size")
-            config.syst_size = st.number_input(
-                '',
-                key='syst_size'
-            )
-        with close_col6:
-            s.questionCSS("Loan/CASH/PPA")
-            config.purch_pref = st.selectbox(
-                '',
-                config.purch_prefs,
-                key='purch_pref'
-            )
-            s.questionCSS("Sold PPW")
-            config.sold_ppw = st.number_input(
-                '',
-                key='sold_ppw'
-            )
-        # Centering the 'Loan amount $' label
-        loan_amount_html = """
-        <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
-            <label style='font-size: 17px; font-family: Arial, sans-serif;'>Loan amount $</label>
-        </div>
-        """
-        st.markdown(loan_amount_html, unsafe_allow_html=True)
-        config.loan_amount = st.number_input('')
-
-        percent_offset_html = """
-        <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
-            <label style='font-size: 17px; font-family: Arial, sans-serif;'>Percent Offset %</label>
-        </div>
-        """
-        st.markdown(percent_offset_html, unsafe_allow_html=True)
-        config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
+            close_col5, close_col6 = st.columns(2)
+            with close_col5:
+                s.questionCSS("Lender")
+                config.lender = st.selectbox(
+                    '',
+                    config.lenders,
+                    key='lender',
+                )
+                s.questionCSS("System Size")
+                config.syst_size = st.number_input(
+                    '',
+                    key='syst_size'
+                )
+            with close_col6:
+                s.questionCSS("Loan/CASH/PPA")
+                config.purch_pref = st.selectbox(
+                    '',
+                    config.purch_prefs,
+                    key='purch_pref'
+                )
+                s.questionCSS("Sold PPW")
+                config.sold_ppw = st.number_input(
+                    '',
+                    key='sold_ppw'
+                )
+            # Centering the 'Loan amount $' label
+            loan_amount_html = """
+            <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
+                <label style='font-size: 17px; font-family: Arial, sans-serif;'>Loan amount $</label>
+            </div>
+            """
+            st.markdown(loan_amount_html, unsafe_allow_html=True)
+            config.loan_amount = st.number_input('')
+    
+            percent_offset_html = """
+            <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: -100px;">
+                <label style='font-size: 17px; font-family: Arial, sans-serif;'>Percent Offset %</label>
+            </div>
+            """
+            st.markdown(percent_offset_html, unsafe_allow_html=True)
+            config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
 
         close_col7, close_col8 = st.columns(2)
         # Applying the same formatting as other labels for checkboxes
