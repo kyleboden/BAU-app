@@ -47,18 +47,15 @@ def data():
         donut_theta = call_disp_filt
 
     donut_data = donut_data.sort_values(by=donut_theta, ascending=False)
-
-    set_col11, set_col12 = st.columns(2)
-
-    with set_col11:
         plost.donut_chart(
             data=donut_data,
             theta=donut_theta,
             color='State',
             use_container_width=True
         )
+    set_col11, set_col12 = st.columns(2)
 
-    with set_col12:
+    with set_col11:
         # Bar chart to show appointments per state
         y_pos = np.arange(len(donut_data))
         #plt.figure(figsize=(10, 6))
@@ -75,12 +72,15 @@ def data():
 
         #plt.tight_layout()
         st.pyplot(plt)
+
+    with set_col12:
+        #if call_disp_filt:
+        disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
     
     #bar chart to show different disps
     
 
-    #if call_disp_filt:
-    disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
+    
 
 
 
