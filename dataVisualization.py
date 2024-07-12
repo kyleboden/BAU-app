@@ -86,7 +86,7 @@ def data():
 
 
 def disp_percent(df, counts, disp_filt, state_filt):
-    if disp_filt == '' and not state_filt:
+    if disp_filt == '' and state_filt.empty:
         # If no filter is selected, display a simplified dataframe
         simplified_df = counts.copy()
         simplified_df['Total Appts'] = counts['Total Appts'].astype(int)
