@@ -65,7 +65,7 @@ def data():
     st.pyplot(plt)
     plt.close()  # Close the figure to prevent overlapping
 
-    disp_percent(state_filtered_deals, state_counts, call_disp_filt, state_filtered_deals)
+    disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
 
     # Bar chart to show different disps
     disp_counts = df_call_filt['Closer Disposition'].value_counts().reset_index()
@@ -127,6 +127,9 @@ def disp_percent(df, counts, disp_filt, state_filt):
         totals_row = pd.DataFrame({'State': ['Total'], 'Total Appts': [counts['Total Appts'].sum()]})
         simplified_df = pd.concat([simplified_df, totals_row], ignore_index=True)
 
+        # Sort the simplified DataFrame by 'Total Appts'
+        simplified_df = simplified_df.sort_values(by='Total Appts', ascending=False)
+
         # Display the simplified dataframe
         st.write("Total Appts for each State:")
         st.table(simplified_df.set_index('State'))
@@ -136,15 +139,24 @@ def disp_percent(df, counts, disp_filt, state_filt):
     # Merge total and filtered deals dfs
     merged_df = pd.merge(counts, state_filt, on='State', how='left')
 
+    # Ensure 'Filtered Deals' column exists
+    if 'Filtered Deals' not in merged_df.columns:
+        merged_df['Filtered Deals'] = 0
+
     # Calculate percentage of filtered deals and round to nearest whole number
     merged_df['Percent'] = (merged_df['Filtered Deals'] / merged_df['Total Appts'] * 100).fillna(0).astype(int).astype(str) + '%'
 
     # Add a row for totals
-    totals_row = pd.DataFrame({'State': ['Total'], 'Total Appts': [merged_df['Total Appts'].sum()], 'Filtered Deals': [merged_df['Filtered Deals'].sum()]})
+    totals_row = pd.DataFrame({'State': ['Total'], 
+                               'Total Appts': [merged_df['Total Appts'].sum()], 
+                               'Filtered Deals': [merged_df['Filtered Deals'].sum()]})
     totals_row['Percent'] = (totals_row['Filtered Deals'] / totals_row['Total Appts'] * 100).fillna(0).astype(int).astype(str) + '%'
 
     # Append totals row to the DataFrame
     merged_df = pd.concat([merged_df, totals_row], ignore_index=True)
+
+    # Sort the DataFrame by 'Total Appts' in descending order
+    merged_df = merged_df.sort_values(by='Total Appts', ascending=False)
 
     # Display the merged dataframe
     st.write(f"Total and {disp_filt} with Percent for each State:")
