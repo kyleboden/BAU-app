@@ -47,12 +47,12 @@ def data():
         donut_theta = call_disp_filt
 
     donut_data = donut_data.sort_values(by=donut_theta, ascending=False)
-        plost.donut_chart(
-            data=donut_data,
-            theta=donut_theta,
-            color='State',
-            use_container_width=True
-        )
+    plost.donut_chart(
+        data=donut_data,
+        theta=donut_theta,
+        color='State',
+        use_container_width=True
+    )
     set_col11, set_col12 = st.columns(2)
 
     with set_col11:
