@@ -89,15 +89,15 @@ def data():
 
     #create 2 bar charts with closer and setter names and call disps
     if setter_filt:
-    y_pos = np.arange(len(disp_counts))
-    plt.figure(figsize=(10, 6))
-    plt.bar(y_pos, disp_counts['Total Appointments'], color='#00a7e1')
-    plt.xticks(y_pos, data['Setter Name'], rotation=45)  # Set x-ticks to dispositions
-    plt.xlabel('Dispositions')
-    plt.ylabel('Total Appointments')
-    plt.title('Total Appointments by Disposition')
-    plt.tight_layout()
-    st.pyplot(plt)
+        y_pos = np.arange(len(disp_counts))
+        plt.figure(figsize=(10, 6))
+        plt.bar(y_pos, disp_counts['Total Appointments'], color='#00a7e1')
+        plt.xticks(y_pos, data['Setter Name'], rotation=45)  # Set x-ticks to dispositions
+        plt.xlabel('Dispositions')
+        plt.ylabel('Total Appointments')
+        plt.title('Total Appointments by Disposition')
+        plt.tight_layout()
+        st.pyplot(plt)
     
     #if closer_filt:
     
