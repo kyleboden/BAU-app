@@ -47,28 +47,31 @@ def data():
         donut_theta = call_disp_filt
 
     donut_data = donut_data.sort_values(by=donut_theta, ascending=False)
-    plost.donut_chart(
-        data=donut_data,
-        theta=donut_theta,
-        color='State',
-        use_container_width=True
-    )
 
-    #bar chart to show appointments per state
-    y_pos = np.arange(len(donut_data))
-    plt.figure(figsize=(10, 6))
-    plt.bar(y_pos, donut_data[donut_theta], color='skyblue')
-    plt.xticks(y_pos, donut_data['State'], rotation=45)  # Set x-ticks
-    plt.xlabel('State')
-    plt.ylabel('Total Appointments')
-    if call_disp_filt:
-        title = f'Total {call_disp_filt} Appointments per State'
-    else:
-        title = 'Total Appointments per State'
-    plt.title(title)
-
-    plt.tight_layout()
-    st.pyplot(plt)
+    set_col1, set_col2 = st.columns(2)
+        with set_col1:
+            plost.donut_chart(
+                data=donut_data,
+                theta=donut_theta,
+                color='State',
+                use_container_width=True
+            )
+        with set_col2:
+            #bar chart to show appointments per state
+            y_pos = np.arange(len(donut_data))
+            plt.figure(figsize=(10, 6))
+            plt.bar(y_pos, donut_data[donut_theta], color='skyblue')
+            plt.xticks(y_pos, donut_data['State'], rotation=45)  # Set x-ticks
+            plt.xlabel('State')
+            plt.ylabel('Total Appointments')
+            if call_disp_filt:
+                title = f'Total {call_disp_filt} Appointments per State'
+            else:
+                title = 'Total Appointments per State'
+            plt.title(title)
+        
+            plt.tight_layout()
+            st.pyplot(plt)
     
     #bar chart to show different disps
     
