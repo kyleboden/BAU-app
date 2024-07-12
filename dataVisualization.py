@@ -15,7 +15,7 @@ def data():
     #--- SIDEBAR ---
 
     
-    call_disp_filt = st.sidebar.selectbox('Call Dispositions', config.dispositions)
+    call_disp_filt = st.sidebar.multiselect('Call Dispositions', config.dispositions)
     states_filt = st.sidebar.multiselect('States', config.states)
     setter_filt = st.sidebar.multiselect('Setter', config.setters)
     closer_filt = st.sidebar.multiselect('Closer', config.closers)
@@ -30,8 +30,8 @@ def data():
         df_call_filt = df[df['State'].isin(states_filt)]
     else:
         df_call_filt = df.copy()
-    if call_disp_filt != '':
-        df_call_filt = df_call_filt[df_call_filt['Closer Disposition'] == call_disp_filt]
+    if call_disp_filt:
+        df_call_filt = df_call_filt[df_call_filt['Closer Disposition'].isin(call_disp_filt)]
     if setter_filt:
         df_call_filt = df_call_filt[df_call_filt['Setter Name'].isin(setter_filt)]
     if closer_filt:
@@ -42,7 +42,7 @@ def data():
     state_filtered_deals = df_call_filt.groupby('State').size().reset_index(name=call_disp_filt)
 
 
-    if call_disp_filt == '' and not states_filt and not setter_filt and not closer_filt:
+    if not call_disp_filt and not states_filt and not setter_filt and not closer_filt:
         data = state_counts #objects
         theta = 'Total Appts'
     else:
@@ -105,19 +105,7 @@ def data():
         st.pyplot(plt)
 
     # Create bar charts with setter and closer names if applicable
-    if setter_filt:
-        st.subheader("Total Appointments by Setter")
-        setter_counts = df_call_filt['Setter Name'].value_counts().reset_index()
-        setter_counts.columns = ['Setter Name', 'Total Appointments']
-        y_pos = np.arange(len(setter_counts))
-        plt.figure(figsize=(12, 8))
-        plt.bar(y_pos, setter_counts['Total Appointments'], color='#00a7e1')
-        plt.xticks(y_pos, setter_counts['Setter Name'], rotation=45, fontsize=12)  # Set x-ticks to setters
-        plt.xlabel('Setter Name', fontsize=14)
-        plt.ylabel('Total Appointments', fontsize=14)
-        plt.title('Total Appointments by Setter', fontsize=16)
-        plt.tight_layout()
-        st.pyplot(plt)
+
     
     #if closer_filt:
     
