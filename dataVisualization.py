@@ -23,8 +23,7 @@ def data():
     # Connecting filters to data
     st.subheader("Pie Chart")
 
-    # Calculate total appointments per state
-    state_counts = df.groupby('State').size().reset_index(name='Total Appts')
+    
 
     # Calculate filtered appointments per state based on filters
     if states_filt:
@@ -33,7 +32,9 @@ def data():
         df_call_filt = df.copy()
     if call_disp_filt != '':
         df_call_filt = df_call_filt[df_call_filt['Closer Disposition'] == call_disp_filt]
-    
+        
+    # Calculate total appointments per state
+    state_counts = df_call_filt.groupby('State').size().reset_index(name='Total Appts')
 
 
     state_filtered_deals = df_call_filt.groupby('State').size().reset_index(name=call_disp_filt)
