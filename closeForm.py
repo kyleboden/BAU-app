@@ -33,7 +33,13 @@ def close_form():
         with close_sub_col2:
             s.questionCSS("Did you call on time?")
             config.on_time = st.radio("", ['Yes', 'No'])
-    
+            placeholder = st.empty()
+    s.questionCSS("Customer's email")
+    config.cx_email = st.text_area(
+        label="",
+        height=100,
+        placeholder="Write here"
+    )
     close_col3, close_col4 = st.columns(2)
     
     with close_col3:
@@ -53,13 +59,7 @@ def close_form():
         )
     
     if st.session_state.visible:
-        placeholder = st.empty()
-        s.questionCSS("Customer's email")
-        config.cx_email = st.text_area(
-            label="",
-            height=100,
-            placeholder="Write here"
-        )
+
         
         "---"
         
