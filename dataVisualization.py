@@ -80,7 +80,13 @@ def data():
         disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
     
     #bar chart to show different disps
-    
+    y_pos = np.arange(len(config.dispositions))
+    #plt.figure(figsize=(10, 6))
+    plt.bar(y_pos, config.dispositions[donut_theta], color='skyblue')
+    plt.xticks(y_pos, config.dispositions, rotation=45)  # Set x-ticks
+    plt.xlabel('Dispositions')
+    plt.ylabel('Total Appointments')
+
 
     
 
