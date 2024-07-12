@@ -36,13 +36,9 @@ def close_form():
             config.closer_disp = st.selectbox(
                 '',
                 disposition_options,
-                key='disposition_select'
+                key='disposition_select',
+                on_change=lambda: st.experimental_rerun()  # Re-run on change
             )
-            if config.closer_disp == "Closed":
-                # Update session state to show fields for "Closed" disposition
-                st.session_state['show_closed_fields'] = True
-            else:
-                st.session_state['show_closed_fields'] = False
 
         s.questionCSS("Customer's email")
         config.cx_email = st.text_area(
@@ -61,7 +57,8 @@ def close_form():
             unsafe_allow_html=True
         )
 
-        if st.session_state.get('show_closed_fields', False):
+        # Display additional fields if "Closed" is selected
+        if st.session_state.get('disposition_select') == "Closed":
             close_col5, close_col6 = st.columns(2)
             with close_col5:
                 s.questionCSS("Lender")
@@ -147,7 +144,6 @@ def close_form():
                                 config.vid_call, config.both_spouses, config.had_UB]
                     db.upsert_email(config.cx_email, new_data)
                     st.success("Customer information saved!")
-                    st.session_state['show_closed_fields'] = False  # Reset the fields after successful submission
                     st.rerun()
             elif config.closer_disp == "We didn't call":
                 new_data = [config.set_date, config.set_time, config.setter_name, config.cx_state, config.cx_name,
@@ -157,7 +153,6 @@ def close_form():
                                 '', '', '']
                 db.upsert_email(config.cx_email, new_data)
                 st.success("Customer information saved!")
-                st.session_state['show_closed_fields'] = False  # Reset the fields after successful submission
                 st.rerun()
             else:
                 if not (config.close_date and config.close_time and config.on_time and config.closer_name and
@@ -171,5 +166,4 @@ def close_form():
                                 config.vid_call, config.both_spouses, config.had_UB]
                     db.upsert_email(config.cx_email, new_data)
                     st.success("Customer information saved!")
-                    st.session_state['show_closed_fields'] = False  # Reset the fields after successful submission
                     st.rerun()
