@@ -69,6 +69,10 @@ def data():
 
     plt.tight_layout()
     st.pyplot(plt)
+    
+    test_state_filt = states_filt
+    if not state_filt:
+        test_state_filt = config.states
 
 
     disp_percent(df_call_filt, state_counts, test_disp_filt, state_filtered_deals)
