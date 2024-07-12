@@ -62,9 +62,9 @@ def data():
         y_pos = np.arange(len(donut_data))
         plt.figure(figsize=(10, 12))
         plt.bar(y_pos, donut_data[donut_theta], color='#00a7e1')
-        plt.xticks(y_pos, donut_data['State'], rotation=45)  # Set x-ticks
-        plt.xlabel('State')
-        plt.ylabel('Total Appointments')
+        plt.xticks(y_pos, donut_data['State'], rotation=45, fontsize = 12)  # Set x-ticks
+        plt.xlabel('State', fontsize = 14)
+        plt.ylabel('Total Appointments', fontsize = 14)
 
         if call_disp_filt:
             title = f'Total {call_disp_filt} Appointments per State'
