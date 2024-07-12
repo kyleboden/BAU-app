@@ -33,40 +33,43 @@ def close_form():
         with close_sub_col2:
             s.questionCSS("Did you call on time?")
             config.on_time = st.radio("", ['Yes', 'No'])
-    close_col7, close_col8 = st.columns(2)
-        with close_col7:
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
-                unsafe_allow_html=True)
-            config.lock_close = st.checkbox('', key='lock_close')
-            
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
-                unsafe_allow_html=True)
-            config.vid_call = st.checkbox('', key='vid_call')
-        
-        with close_col8:
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
-                unsafe_allow_html=True)
-            config.both_spouses = st.checkbox('', key='both_spouses')
-            
-            st.markdown(
-                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
-                unsafe_allow_html=True)
-            config.had_UB = st.checkbox('', key='had_UB')
-        
-        "---"
+    
+    # New location for the checkboxes
     close_col3, close_col4 = st.columns(2)
     
     with close_col3:
+        st.markdown(
+            "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
+            unsafe_allow_html=True)
+        config.lock_close = st.checkbox('', key='lock_close')
+        
+        st.markdown(
+            "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
+            unsafe_allow_html=True)
+        config.vid_call = st.checkbox('', key='vid_call')
+    
+    with close_col4:
+        st.markdown(
+            "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
+            unsafe_allow_html=True)
+        config.both_spouses = st.checkbox('', key='both_spouses')
+        
+        st.markdown(
+            "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
+            unsafe_allow_html=True)
+        config.had_UB = st.checkbox('', key='had_UB')
+    
+    # Closer name and disposition after checkboxes
+    close_col5, close_col6 = st.columns(2)
+    
+    with close_col5:
         s.questionCSS("Closer Name")
         config.closer_name = st.selectbox(
             '',
             config.closers
         )
     
-    with close_col4:
+    with close_col6:
         s.questionCSS("Call Disposition")
         config.closer_disp = st.selectbox(
             '',
@@ -86,8 +89,6 @@ def close_form():
         
         "---"
         
-
-        
         st.markdown(
             """
             <div style="text-align: center; font-size: 24px; font-weight: bold; padding-bottom: 20px;">
@@ -97,9 +98,9 @@ def close_form():
             unsafe_allow_html=True
         )
         
-        close_col5, close_col6 = st.columns(2)
+        close_col7, close_col8 = st.columns(2)
         
-        with close_col5:
+        with close_col7:
             s.questionCSS("Lender")
             config.lender = st.selectbox(
                 '',
@@ -113,7 +114,7 @@ def close_form():
                 key='syst_size'
             )
         
-        with close_col6:
+        with close_col8:
             s.questionCSS("Loan/CASH/PPA")
             config.purch_pref = st.selectbox(
                 '',
@@ -147,7 +148,31 @@ def close_form():
         )
         config.percent_offset = st.slider("", value=100, min_value=50, max_value=150)
         
+        close_col9, close_col10 = st.columns(2)
         
+        with close_col9:
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Lock Close?</p>",
+                unsafe_allow_html=True)
+            config.lock_close = st.checkbox('', key='lock_close')
+            
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Video Call?</p>",
+                unsafe_allow_html=True)
+            config.vid_call = st.checkbox('', key='vid_call')
+        
+        with close_col10:
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>All decision makers?</p>",
+                unsafe_allow_html=True)
+            config.both_spouses = st.checkbox('', key='both_spouses')
+            
+            st.markdown(
+                "<p style='font-size: 17px; font-family: Arial, sans-serif; margin-bottom: 0px;'>Had UB?</p>",
+                unsafe_allow_html=True)
+            config.had_UB = st.checkbox('', key='had_UB')
+        
+        "---"
     
     with st.form("entry_form", clear_on_submit=True):
         st.session_state.submitted = st.form_submit_button("Submit")
@@ -177,26 +202,3 @@ def close_form():
                 config.set_date, config.set_time, config.setter_name, config.cx_state, config.cx_name,
                 config.cx_email, config.set_comment, config.unpaid_lead, config.close_date, '', '',
                 config.closer_name, config.closer_disp, config.lender, config.syst_size, config.purch_pref,
-                config.close_comment, '', '', '', '', '', '', ''
-            ]
-            db.upsert_email(config.cx_email, new_data)
-            st.success("Customer information saved!")
-            st.experimental_rerun()
-        else:
-            required_fields = [
-                config.close_date, config.close_time, config.on_time, config.closer_name,
-                config.closer_disp, config.cx_email
-            ]
-            if not all(required_fields):
-                st.error("Please fill in all fields before submitting.")
-            else:
-                new_data = [
-                    config.set_date, config.set_time, config.setter_name, config.cx_state, config.cx_name,
-                    config.cx_email, config.set_comment, config.unpaid_lead, config.close_date, config.close_time,
-                    config.on_time, config.closer_name, config.closer_disp, config.lender, config.purch_pref,
-                    config.close_comment, config.sold_ppw, config.loan_amount, config.percent_offset, config.lock_close,
-                    config.vid_call, config.both_spouses, config.had_UB
-                ]
-                db.upsert_email(config.cx_email, new_data)
-                st.success("Customer information saved!")
-                st.experimental_rerun()
