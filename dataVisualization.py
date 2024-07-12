@@ -99,7 +99,7 @@ def data():
     plt.tight_layout()
     st.pyplot(plt)
     
-    if closer_filt:
+    #if closer_filt:
     
 
 
