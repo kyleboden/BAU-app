@@ -64,6 +64,7 @@ def data():
         title = f'Total {call_disp_filt} Appointments per State'
     else:
         title = 'Total Appointments per State'
+        call_disp_filt = config.dispositions
     plt.title(title)
 
     plt.tight_layout()
