@@ -5,6 +5,12 @@ import database as db
 import settings as s
 import config
 
+if 'visible' not in st.session_state:
+    st.session_state.visible = False
+if 'submitted' not in st.session_state:
+    st.session_state.submitted = False
+
+
 def update_visibility():
     if st.session_state.config.closer_disp == 'Closed':
         st.session_state.visible = True
