@@ -42,8 +42,6 @@ def data():
     if call_disp_filt == '':
         donut_data = state_counts
         donut_theta = 'Total Appts'
-
-
     else:
         donut_data = state_filtered_deals
         donut_theta = call_disp_filt
@@ -53,6 +51,19 @@ def data():
         color='State',
         use_container_width=True
     )
+
+    #bar chart to show appointments per state
+    st.subheader("Bar Chart")
+    fig, ax = plt.subplots()
+    ax.bar(state_counts['State'], state_counts['Total Appts'])
+    ax.set_xlabel('State')
+    ax.set_ylabel('Total Appointments')
+    ax.set_title('Total Appointments per State')
+    st.pyplot(fig)
+
+    
+    #bar chart to show different disps
+    
 
     #if call_disp_filt:
     disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
