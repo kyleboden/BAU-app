@@ -10,7 +10,7 @@ import database
 import config
 
 sheet = database.sheet
-AMP_Logo_Blue = "images/AMP_Logo.png"
+AMP_Logo_Blue = "images/AMP_Logo_Blue.png"
 
 def data():
     df = pd.DataFrame(sheet.get_all_records())
