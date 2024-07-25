@@ -1,57 +1,777 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+import plotly.express as px
+
 import pandas as pd
 import numpy as np
+from datetime import date
 
 import database
 import config
 
 sheet = database.sheet
+AMP_Logo_Blue = r"C:\Users\boden\PycharmProjects\DataPersonalProject\AMP_Logo_Blue.png"
+
 
 def data():
+    df = pd.DataFrame(sheet.get_all_records())
+    df_call_filt = df.copy()  # should be this if no other filters are applied
+    df_call_filt = month_year_col(df_call_filt)
+
+    st.sidebar.image(AMP_Logo_Blue, width=100)
+    st.sidebar.header("Please Filter Here:")
+    data_options = st.sidebar.selectbox('Choose which Dashboard to see', options = ['Team', 'Closer', 'Setter', 'Detailed Data'])
+    month_year_filt = st.sidebar.multiselect('Date', options=df_call_filt["Month_Year"].unique())
+    if month_year_filt:
+        df_call_filt = df_call_filt[df_call_filt['Month_Year'].isin(month_year_filt)]
+    #csv_button = st.sidebar.button('Click to generate list of non-recorded appts')
+    st.title(f"{data_options} Dashboard")
+    st.markdown("---")
+
+    st.sidebar.markdown("---")
+    #st.sidebar.markdown("###")
+
+
+    if data_options == 'Team':
+        t_dashboard(df_call_filt)
+    elif data_options == 'Closer':
+        c_dashboard(df_call_filt)
+    elif data_options == 'Setter':
+        s_dashboard(df_call_filt)
+    elif data_options == 'Detailed Data':
+        d_dashboard(df_call_filt, month_year_filt)
+
+    st.sidebar.markdown("---")
+
+    nonrecord_apts_df = df[df['Closer Disposition'] == '']
+    st.sidebar.download_button(
+        "Click to generate list of non-recorded appts",
+        generate_csv(nonrecord_apts_df),
+        f"unrecorded_appts_{date.today()}.csv",
+        "text/csv",
+        key='download-csv'
+    )
+
+
+
+def t_dashboard(df):
+    #KPI's
+    total_sets = len(df)
+    total_sets_happened = (df['Closer Disposition'] != '').sum()
+    total_happened_df = df[df['Closer Disposition'] != '']
+    total_nosits = (df['Closer Disposition'] == 'No Sit').sum()
+    total_sits = total_sets_happened - total_nosits # maybe - reschedules
+    total_close = (df['Closer Disposition'] == 'Closed').sum()
+    #st.write(total_close)
+
+    left_col, middle_col, right_col = st.columns(3)
+
+    with left_col:
+        st.markdown(f"""
+        <div style="background-color: #ECFCFF; border-radius: 15px; padding: 20px; text-align: center;">
+            <h3 style="margin: 0; padding: 0;">Total Sets:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_sets}</h1>
+            <h3 style="margin: 0; padding: 0; margin-top: 15px;">Recorded Appts:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_sets_happened}</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with middle_col:
+        st.markdown(f"""
+        <div style="background-color: #E6F4F1; border-radius: 15px; padding: 20px; text-align: center;">
+            <h3 style="margin: 0; padding: 0;">Total Sits:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_sits}</h1>
+            <h3 style="margin: 0; padding: 0; margin-top: 15px;">Sit rate:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{((total_sits / total_sets_happened) * 100).astype(int)}%</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with right_col:
+        st.markdown(f"""
+        <div style="background-color: #95B0B7; border-radius: 15px; padding: 20px; text-align: center;">
+            <h3 style="margin: 0; padding: 0;">Total Closes:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_close}</h1>
+            <h3 style="margin: 0; padding: 0; margin-top: 15px;">Close rate:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{((total_close / total_sets_happened) * 100).astype(int)}%</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # --- BAR CHARTS ---
+    closes_df = df[df['Closer Disposition'] == 'Closed']
+    noSits_df = df[df['Closer Disposition'] == 'No Sit']
+    # Closes by Close Bar
+    closes_by_closer = closes_df.groupby('Closer Name').size().sort_values(ascending=False)
+    #st.bar_chart(closes_by_closer)
+
+    fig_closes_closer = px.bar(
+        closes_by_closer,
+        x=closes_by_closer.index,
+        y=closes_by_closer.values,
+        orientation="v",
+        title="<b>Closes by Closer</b>",
+        color_discrete_sequence=["#2fddff"] * len(closes_by_closer),
+        labels={"y": "Number of Closes"}
+    )
+    fig_closes_closer.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+
+    #st.bar_chart(closes_by_closer)
+    # Closes by Setter Bar
+    closes_by_setter = closes_df.groupby('Setter Name').size().sort_values(ascending=False)
+    fig_closes_setter = px.bar(
+        closes_by_setter,
+        x=closes_by_setter.index,
+        y=closes_by_setter.values,
+        orientation="v",
+        title="<b>Closes by Setter</b>",
+        color_discrete_sequence=["#2fddff"] * len(closes_by_setter),
+        labels={"y": "Number of Closes"}
+    )
+    fig_closes_setter.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+
+
+    # Closes by Disp Bar
+    closes_by_disp = total_happened_df.groupby('Closer Disposition').size().sort_values(ascending=True)
+    fig_closes_disp = px.bar(
+        closes_by_disp,
+        y=closes_by_disp.index,
+        x=closes_by_disp.values,
+        orientation="h",
+        title="<b>Call Disposition</b>",
+        color_discrete_sequence=["#2fddff"] * len(closes_by_disp),
+        labels={"x": "Number of Appts","y": "Call Disposition"}
+    )
+    fig_closes_disp.update_layout(
+        title_x=0.5
+    )
+
+    # Closes by State Bar
+    closes_by_state = closes_df.groupby('State').size().sort_values(ascending=True)
+    fig_closes_by_state = px.bar(
+        closes_by_state,
+        y=closes_by_state.index,
+        x=closes_by_state.values,
+        orientation="h",
+        title="<b>Closes by State</b>",
+        color_discrete_sequence=["#2fddff"] * len(closes_by_state),
+        labels = {"x": "Number of Closes", "y": "State"}
+
+    )
+    fig_closes_by_state.update_layout(
+        title_x=0.5
+    )
+
+    left_col, right_col = st.columns(2)
+    left_col.plotly_chart(fig_closes_closer, use_container_width=True)
+    right_col.plotly_chart(fig_closes_setter, use_container_width=True)
+    left_col.plotly_chart(fig_closes_disp, use_container_width=True)
+    right_col.plotly_chart(fig_closes_by_state, use_container_width=True)
+
+
+    st.markdown("---")
+    st.header("Time of Day Charts")
+    st.markdown("---")
+    left_col, right_col = st.columns(2)
+
+
+    time_set_s = df.groupby('Set Time').size()
+    time_close_c = closes_df.groupby('Close Time').size()
+    #time_set_close = closes_df.groupby('Set Time').size()
+    time_noSit_c = noSits_df.groupby('Close Time').size()
+    time_appts_c = total_happened_df.groupby('Close Time').size()
+
+    fig_time_set_s = px.bar(
+        time_set_s,
+        x=time_set_s.index,
+        y=time_set_s.values,
+        orientation="v",
+        title="<b>Sets by Time of Day</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_set_s),
+        labels={"y": "Number of Sets"}
+    )
+    fig_time_set_s.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+
+    fig_time_close_c = px.bar(
+        time_close_c,
+        x=time_close_c.index,
+        y=time_close_c.values,
+        orientation="v",
+        title="<b>Closes by Time of Day</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_close_c),
+        labels={"y": "Number of Closes"}
+    )
+    fig_time_close_c.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+
+    fig_time_noSit_c = px.bar(
+        time_noSit_c,
+        x=time_noSit_c.index,
+        y=time_noSit_c.values,
+        orientation="v",
+        title="<b>No Sits by Time of Day</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_noSit_c),
+        labels={"y": "Number of No Sits"}
+    )
+    fig_time_noSit_c.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+
+    """
+    fig_time_set_close = px.bar(
+        time_set_close,
+        x=time_set_close.index,
+        y=time_set_close.values,
+        orientation="v",
+        title="<b>Closes by Time Appt Was Set</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_set_close),
+        labels={"y": "Number of Closes"}
+    )
+    fig_time_set_close.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+    """
+
+
+    fig_time_appts_c = px.bar(
+        time_appts_c,
+        x=time_appts_c.index,
+        y=time_appts_c.values,
+        orientation="v",
+        title="<b>Time of Closer Appts</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_appts_c),
+        labels={"y": "Number of Appts"}
+    )
+    fig_time_appts_c.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+
+    left_col.plotly_chart(fig_time_set_s, use_container_width=True)
+    right_col.plotly_chart(fig_time_noSit_c, use_container_width=True)
+    left_col.plotly_chart(fig_time_close_c, use_container_width=True)
+    right_col.plotly_chart(fig_time_appts_c, use_container_width=True)
+    #right_col.plotly_chart(fig_time_set_close, use_container_width=True)
+
+
+
+def c_dashboard(df):
+    closer_filt = st.sidebar.selectbox('Closer', config.closers)
+    closer_name = closer_filt if closer_filt else "Select a Closer"
+    if closer_filt:
+        df = df[df['Closer Name'].isin([closer_filt])]
+
+    st.markdown(
+        f"""
+        <h1 style="text-align: center;">{closer_name}</h1>
+        <br>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+    #KPI's
+    total_sets = len(df)
+    total_sets_happened = (df['Closer Disposition'] != '').sum()
+    total_happened_df = df[df['Closer Disposition'] != '']
+    total_nosits = (df['Closer Disposition'] == 'No Sit').sum()
+    total_sits = total_sets_happened - total_nosits # maybe - reschedules
+    total_close = (df['Closer Disposition'] == 'Closed').sum()
+
+    left_col, middle_col, right_col = st.columns(3)
+
+    with left_col:
+        st.markdown(f"""
+        <div style="background-color: #ECFCFF; border-radius: 15px; padding: 20px; text-align: center;">
+            <h3 style="margin: 0; padding: 0;">Total Appointments:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_sets}</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with middle_col:
+        st.markdown(f"""
+        <div style="background-color: #E6F4F1; border-radius: 15px; padding: 20px; text-align: center;">
+            <h3 style="margin: 0; padding: 0;">Total Sits:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_sits}</h1>
+            <h3 style="margin: 0; padding: 0; margin-top: 15px;">Sit rate:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{((total_sits / total_sets_happened) * 100).astype(int)}%</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with right_col:
+        st.markdown(f"""
+        <div style="background-color: #95B0B7; border-radius: 15px; padding: 20px; text-align: center;">
+            <h3 style="margin: 0; padding: 0;">Total Closes:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_close}</h1>
+            <h3 style="margin: 0; padding: 0; margin-top: 15px;">Close rate:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{((total_close / total_sets_happened) * 100).astype(int)}%</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # --- BAR CHARTS ---
+    closes_df = df[df['Closer Disposition'] == 'Closed']
+    noSits_df = df[df['Closer Disposition'] == 'No Sit']
+
+    if closes_df.empty:
+        st.markdown(
+            """
+            <h1 style="text-align: center; color: red;">
+                🔔 You need at least one Close in the current date range for the charts to show up. 🔔 
+            </h1>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # Closes by Disp Bar
+    closes_by_disp = total_happened_df.groupby('Closer Disposition').size().sort_values(ascending=True)
+    fig_closes_disp = px.bar(title="<b>Call Disposition</b>")
+    if not closes_by_disp.empty:
+        fig_closes_disp = px.bar(
+            closes_by_disp,
+            y=closes_by_disp.index,
+            x=closes_by_disp.values,
+            orientation="h",
+            title="<b>Call Disposition</b>",
+            color_discrete_sequence=["#2fddff"] * len(closes_by_disp),
+            labels={"x": "Number of Appts","y": "Call Disposition"}
+        )
+        fig_closes_disp.update_layout(
+            title_x=0.5
+        )
+
+    # Closes by Setter Bar
+    closes_by_setter = closes_df.groupby('Setter Name').size().sort_values(ascending=False)
+    fig_closes_setter = px.bar(title="<b>Closes by Setter</b>")
+    if not closes_by_setter.empty:
+        fig_closes_setter = px.bar(
+            closes_by_setter,
+            x=closes_by_setter.index,
+            y=closes_by_setter.values,
+            orientation="v",
+            title="<b>Closes by Setter</b>",
+            color_discrete_sequence=["#2fddff"] * len(closes_by_setter),
+            labels={"y": "Number of Closes"}
+        )
+        fig_closes_setter.update_layout(
+            xaxis_title=None,
+            title_x=0.5
+        )
+    # Closes by Time Bar
+
+    closes_df.set_index('Close Date', inplace=True)
+    closes_by_week = closes_df.resample('W').size()
+
+    fig_closes_by_time = px.bar(title="<b>Closes over Time (Weekly)</b>")
+    if not closes_by_week.empty:
+        fig_closes_by_time = px.line(
+            x=closes_by_week.index,
+            y=closes_by_week.values,
+            title="<b>Closes over Time (Weekly)</b>",
+            labels={"x": "Date", "y": "Number of Closes"}
+        )
+        fig_closes_by_time.update_layout(title_x=0.5)
+        fig_closes_by_time.update_traces(line=dict(color="#2fddff", width=3))
+
+        # Display the note and the graph
+        if len(closes_by_week) < 3:
+            fig_closes_by_time.add_annotation(
+                x=0.5,
+                y=0.5,
+                text="🔔 For some reason, the Closes over Time graph requires at least 3 closes to be recorded. 🔔",
+                showarrow=False,
+                font=dict(size=12, color="red"),
+                align="center",
+                xref="paper",
+                yref="paper"
+            )
+
+    # Closes by State Bar
+    closes_by_state = closes_df.groupby('State').size().sort_values(ascending=True)
+    fig_closes_by_state = px.bar(title="<b>Closes by State</b>")
+    if not closes_by_state.empty:
+        fig_closes_by_state = px.bar(
+            closes_by_state,
+            y=closes_by_state.index,
+            x=closes_by_state.values,
+            orientation="h",
+            title="<b>Closes by State</b>",
+            color_discrete_sequence=["#2fddff"] * len(closes_by_state),
+            labels = {"x": "Number of Closes", "y": "State"}
+
+        )
+        fig_closes_by_state.update_layout(
+            title_x=0.5
+        )
+
+    left_col, right_col = st.columns(2)
+    left_col.plotly_chart(fig_closes_setter, use_container_width=True)
+    left_col.plotly_chart(fig_closes_disp, use_container_width=True)
+    right_col.plotly_chart(fig_closes_by_time, use_container_width=True)
+    right_col.plotly_chart(fig_closes_by_state, use_container_width=True)
+
+
+    st.markdown("---")
+    st.header("Time of Day Charts")
+    st.markdown("---")
+    left_col, right_col = st.columns(2)
+
+
+    time_set_s = df.groupby('Set Time').size()
+    time_close_c = closes_df.groupby('Close Time').size()
+    #time_set_close = closes_df.groupby('Set Time').size()
+    time_noSit_c = noSits_df.groupby('Close Time').size()
+    time_appts_c = total_happened_df.groupby('Close Time').size()
+
+    fig_time_set_s = px.bar(title="<b>Appts by Time of Day</b>")
+    if not time_set_s.empty:
+        fig_time_set_s = px.bar(
+            time_set_s,
+            x=time_set_s.index,
+            y=time_set_s.values,
+            orientation="v",
+            title="<b>Appts by Time of Day</b>",
+            color_discrete_sequence=["#2fddff"] * len(time_set_s),
+            labels={"y": "Number of Sets"}
+        )
+        fig_time_set_s.update_layout(
+            xaxis_title=None,
+            title_x=0.5
+        )
+    left_col.plotly_chart(fig_time_set_s, use_container_width=True)
+
+    fig_time_close_c = px.bar(title="<b>Closes by Time of Day</b>")
+    if not time_close_c.empty:
+        fig_time_close_c = px.bar(
+            time_close_c,
+            x=time_close_c.index,
+            y=time_close_c.values,
+            orientation="v",
+            title="<b>Closes by Time of Day</b>",
+            color_discrete_sequence=["#2fddff"] * len(time_close_c),
+            labels={"y": "Number of Closes"}
+        )
+        fig_time_close_c.update_layout(
+            xaxis_title=None,
+            title_x=0.5
+        )
+
+    fig_time_noSit_c = px.bar(title="<b>No Sits by Time of Day</b>")
+    if not time_noSit_c.empty:
+        fig_time_noSit_c = px.bar(
+            time_noSit_c,
+            x=time_noSit_c.index,
+            y=time_noSit_c.values,
+            orientation="v",
+            title="<b>No Sits by Time of Day</b>",
+            color_discrete_sequence=["#2fddff"] * len(time_noSit_c),
+            labels={"y": "Number of No Sits"}
+        )
+        fig_time_noSit_c.update_layout(
+            xaxis_title=None,
+            title_x=0.5
+        )
+
+
+    right_col.plotly_chart(fig_time_noSit_c, use_container_width=True)
+    left_col.plotly_chart(fig_time_close_c, use_container_width=True)
+    #right_col.plotly_chart(fig_time_appts_c, use_container_width=True)
+    #right_col.plotly_chart(fig_time_set_close, use_container_width=True)
+
+def s_dashboard(df):
+    setter_filt = st.sidebar.selectbox('Setter', config.setters)
+    setter_name = setter_filt if setter_filt else "Select a Setter"
+    if setter_filt:
+        df = df[df['Setter Name'].isin([setter_filt])]
+
+    st.markdown(
+        f"""
+        <h1 style="text-align: center;">{setter_name}</h1>
+        <br>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+    #KPI's
+    total_sets = len(df)
+    total_sets_happened = (df['Closer Disposition'] != '').sum()
+    total_happened_df = df[df['Closer Disposition'] != '']
+    total_nosits = (df['Closer Disposition'] == 'No Sit').sum()
+    total_sits = total_sets_happened - total_nosits # maybe - reschedules
+    total_close = (df['Closer Disposition'] == 'Closed').sum()
+
+    left_col, middle_col, right_col = st.columns(3)
+
+    with left_col:
+        st.markdown(f"""
+        <div style="background-color: #ECFCFF; border-radius: 15px; padding: 20px; text-align: center;">
+            <h3 style="margin: 0; padding: 0;">Total Sets:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_sets}</h1>
+            <h3 style="margin: 0; padding: 0; margin-top: 15px;">Recorded Appts:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_sets_happened}</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with middle_col:
+        st.markdown(f"""
+        <div style="background-color: #E6F4F1; border-radius: 15px; padding: 20px; text-align: center;">
+            <h3 style="margin: 0; padding: 0;">Total Sits:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_sits}</h1>
+            <h3 style="margin: 0; padding: 0; margin-top: 15px;">Sit rate:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{((total_sits / total_sets_happened) * 100).astype(int)}%</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with right_col:
+        st.markdown(f"""
+        <div style="background-color: #95B0B7; border-radius: 15px; padding: 20px; text-align: center;">
+            <h3 style="margin: 0; padding: 0;">Total Closes:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{total_close}</h1>
+            <h3 style="margin: 0; padding: 0; margin-top: 15px;">Close rate:</h3>
+            <h1 style="font-size: 3em; margin: 0; padding: 0;">{((total_close / total_sets_happened) * 100).astype(int)}%</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # --- BAR CHARTS ---
+    closes_df = df[df['Closer Disposition'] == 'Closed']
+    noSits_df = df[df['Closer Disposition'] == 'No Sit']
+
+    if closes_df.empty:
+        st.markdown(
+            """
+            <h1 style="text-align: center; color: red;">
+                🔔 You need at least one Close in the current date range for the charts to show up. 🔔 
+            </h1>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # Closes by Disp Bar
+    closes_by_disp = total_happened_df.groupby('Closer Disposition').size().sort_values(ascending=True)
+    fig_closes_disp = px.bar(title="<b>Call Disposition</b>")
+    if not closes_by_disp.empty:
+        fig_closes_disp = px.bar(
+            closes_by_disp,
+            y=closes_by_disp.index,
+            x=closes_by_disp.values,
+            orientation="h",
+            title="<b>Call Disposition</b>",
+            color_discrete_sequence=["#2fddff"] * len(closes_by_disp),
+            labels={"x": "Number of Appts","y": "Call Disposition"}
+        )
+        fig_closes_disp.update_layout(
+            title_x=0.5
+        )
+
+    # Closes by Close Bar
+    closes_by_closer = closes_df.groupby('Closer Name').size().sort_values(ascending=False)
+    fig_closes_closer = px.bar(title="<b>Closes by Closer</b>")
+    if not closes_by_closer.empty:
+        fig_closes_closer = px.bar(
+            closes_by_closer,
+            x=closes_by_closer.index,
+            y=closes_by_closer.values,
+            orientation="v",
+            title="<b>Closes by Closer</b>",
+            color_discrete_sequence=["#2fddff"] * len(closes_by_closer),
+            labels={"y": "Number of Closes"}
+        )
+        fig_closes_closer.update_layout(
+            xaxis_title=None,
+            title_x=0.5
+        )
+    # Closes by Time Bar
+
+    closes_df.set_index('Close Date', inplace=True)
+    closes_by_week = closes_df.resample('W').size()
+
+    fig_closes_by_time = px.bar(title="<b>Closes over Time (Weekly)</b>")
+    if not closes_by_week.empty:
+        fig_closes_by_time = px.line(
+            x=closes_by_week.index,
+            y=closes_by_week.values,
+            title="<b>Closes over Time (Weekly)</b>",
+            labels={"x": "Date", "y": "Number of Closes"}
+        )
+        fig_closes_by_time.update_layout(title_x=0.5)
+        fig_closes_by_time.update_traces(line=dict(color="#2fddff", width=3))
+
+        # Display the note and the graph
+        if len(closes_by_week) < 3:
+            fig_closes_by_time.add_annotation(
+                x=0.5,
+                y=0.5,
+                text="🔔 For some reason, the Closes over Time graph requires at least 3 closes to be recorded. 🔔",
+                showarrow=False,
+                font=dict(size=12, color="red"),
+                align="center",
+                xref="paper",
+                yref="paper"
+            )
+
+    # Closes by State Bar
+    closes_by_state = closes_df.groupby('State').size().sort_values(ascending=True)
+    fig_closes_by_state = px.bar(title="<b>Closes by State</b>")
+    if not closes_by_state.empty:
+        fig_closes_by_state = px.bar(
+            closes_by_state,
+            y=closes_by_state.index,
+            x=closes_by_state.values,
+            orientation="h",
+            title="<b>Closes by State</b>",
+            color_discrete_sequence=["#2fddff"] * len(closes_by_state),
+            labels = {"x": "Number of Closes", "y": "State"}
+
+        )
+        fig_closes_by_state.update_layout(
+            title_x=0.5
+        )
+
+    left_col, right_col = st.columns(2)
+    left_col.plotly_chart(fig_closes_closer, use_container_width=True)
+    left_col.plotly_chart(fig_closes_disp, use_container_width=True)
+    right_col.plotly_chart(fig_closes_by_time, use_container_width=True)
+    right_col.plotly_chart(fig_closes_by_state, use_container_width=True)
+
+
+    st.markdown("---")
+    st.header("Time of Day Charts")
+    st.markdown("---")
+    left_col, right_col = st.columns(2)
+
+
+    time_set_s = df.groupby('Set Time').size()
+    time_close_c = closes_df.groupby('Close Time').size()
+    #time_set_close = closes_df.groupby('Set Time').size()
+    time_noSit_c = noSits_df.groupby('Close Time').size()
+    time_appts_c = total_happened_df.groupby('Close Time').size()
+
+    fig_time_set_s = px.bar(title="<b>Sets by Time of Day</b>")
+    if not time_set_s.empty:
+        fig_time_set_s = px.bar(
+            time_set_s,
+            x=time_set_s.index,
+            y=time_set_s.values,
+            orientation="v",
+            title="<b>Sets by Time of Day</b>",
+            color_discrete_sequence=["#2fddff"] * len(time_set_s),
+            labels={"y": "Number of Sets"}
+        )
+        fig_time_set_s.update_layout(
+            xaxis_title=None,
+            title_x=0.5
+        )
+    left_col.plotly_chart(fig_time_set_s, use_container_width=True)
+
+    fig_time_close_c = px.bar(title="<b>Closes by Time of Day</b>")
+    if not time_close_c.empty:
+        fig_time_close_c = px.bar(
+            time_close_c,
+            x=time_close_c.index,
+            y=time_close_c.values,
+            orientation="v",
+            title="<b>Closes by Time of Day</b>",
+            color_discrete_sequence=["#2fddff"] * len(time_close_c),
+            labels={"y": "Number of Closes"}
+        )
+        fig_time_close_c.update_layout(
+            xaxis_title=None,
+            title_x=0.5
+        )
+
+    fig_time_noSit_c = px.bar(title="<b>No Sits by Time of Day</b>")
+    if not time_noSit_c.empty:
+        fig_time_noSit_c = px.bar(
+            time_noSit_c,
+            x=time_noSit_c.index,
+            y=time_noSit_c.values,
+            orientation="v",
+            title="<b>No Sits by Time of Day</b>",
+            color_discrete_sequence=["#2fddff"] * len(time_noSit_c),
+            labels={"y": "Number of No Sits"}
+        )
+        fig_time_noSit_c.update_layout(
+            xaxis_title=None,
+            title_x=0.5
+        )
+
+    fig_time_appts_c = px.bar(title="<b>Time of Closer Appts</b>")
+    if not time_noSit_c.empty:
+        fig_time_appts_c = px.bar(
+            time_noSit_c,
+            x=time_noSit_c.index,
+            y=time_noSit_c.values,
+            orientation="v",
+            title="<b>Time of Closer Appts</b>",
+            color_discrete_sequence=["#2fddff"] * len(time_noSit_c),
+            labels={"y": "Number of Appts"}
+        )
+        fig_time_appts_c.update_layout(
+            xaxis_title=None,
+            title_x=0.5
+        )
+
+    right_col.plotly_chart(fig_time_noSit_c, use_container_width=True)
+    left_col.plotly_chart(fig_time_close_c, use_container_width=True)
+    right_col.plotly_chart(fig_time_appts_c, use_container_width=True)
+    #right_col.plotly_chart(fig_time_set_close, use_container_width=True)
+
+def d_dashboard(df, month_year_filt):
+    #df = pd.DataFrame(sheet.get_all_records())
+    df_call_filt = df.copy()  # should be this if no other filters are applied
+
+    df_call_filt = month_year_col(df_call_filt)
+
     # --- SIDEBAR ---
+    st.sidebar.header("Please Filter Here:")
+    #month_year_filt = st.sidebar.multiselect('Date', options=df_call_filt["Month_Year"].unique())
     call_disp_filt = st.sidebar.multiselect('Call Dispositions', config.dispositions)
     states_filt = st.sidebar.multiselect('States', config.states)
     setter_filt = st.sidebar.multiselect('Setter', config.setters)
     closer_filt = st.sidebar.multiselect('Closer', config.closers)
-    df = pd.DataFrame(sheet.get_all_records())
-
-    st.title("My Streamlit Dashboard")
 
     # Connecting filters to data
-    df_call_filt = df.copy()
-    if states_filt:
-        df_call_filt = df_call_filt[df_call_filt['State'].isin(states_filt)]
-    if call_disp_filt:
-        df_call_filt = df_call_filt[df_call_filt['Closer Disposition'].isin(call_disp_filt)]
+
+    state_counts_og = df.groupby('State').size().sort_values(ascending=False)
+    if month_year_filt:
+        df_call_filt = df_call_filt[df_call_filt['Month_Year'].isin(month_year_filt)]
+        state_counts_og = df_call_filt.groupby('State').size().sort_values(ascending=False)
     if setter_filt:
         df_call_filt = df_call_filt[df_call_filt['Setter Name'].isin(setter_filt)]
+        state_counts_og = df_call_filt.groupby('State').size().sort_values(ascending=False)
     if closer_filt:
         df_call_filt = df_call_filt[df_call_filt['Closer Name'].isin(closer_filt)]
-        
-    # Calculate total appointments per state
-    state_counts = df_call_filt.groupby('State').size().reset_index(name='Total Appts')
-    state_filtered_deals = df_call_filt.groupby('State').size().reset_index(name='Filtered Deals')
+        state_counts_og = df_call_filt.groupby('State').size().sort_values(ascending=False)
+    if states_filt:
+        df_call_filt = df_call_filt[df_call_filt['State'].isin(states_filt)]
+        state_counts_og = df_call_filt.groupby('State').size().sort_values(ascending=False)
+    if call_disp_filt:
+        df_call_filt = df_call_filt[df_call_filt['Closer Disposition'].isin(call_disp_filt)]
 
-    if not call_disp_filt and not states_filt and not setter_filt and not closer_filt:
-        data = state_counts  # objects
-        theta = 'Total Appts'
-    else:
-        data = state_filtered_deals  # objects
-        theta = 'Filtered Deals'
-
-    # Check if theta column exists in data
-    if theta not in data.columns:
-        st.error(f"Column '{theta}' does not exist in the data.")
-        return
-
-    data = data.sort_values(by=theta, ascending=False)
-
+    # --- Total appointments per state ---
+    state_counts_filt = df_call_filt.groupby('State').size().sort_values(ascending=False)
     # Bar chart to show appointments per state
-    y_pos = np.arange(len(data))
+    y_pos = np.arange(len(state_counts_filt))
     plt.figure(figsize=(12, 10))
-    plt.bar(y_pos, data[theta], color='#00a7e1')
-    plt.xticks(y_pos, data['State'], rotation=45, fontsize=12)  # Set x-ticks
+    plt.bar(y_pos, state_counts_filt.values, color='#00a7e1')
+    plt.xticks(y_pos, state_counts_filt.index, rotation=45, fontsize=12)  # Set x-ticks
     plt.xlabel('State', fontsize=14)
     plt.ylabel('Total Appointments', fontsize=14)
 
@@ -65,12 +785,11 @@ def data():
     st.pyplot(plt)
     plt.close()  # Close the figure to prevent overlapping
 
-    disp_percent(df_call_filt, state_counts, call_disp_filt, state_filtered_deals)
+    disp_percent(state_counts_og, state_counts_filt, call_disp_filt)
 
-    # Bar chart to show different disps
+    #  --- Bar chart to show different disps ---
     disp_counts = df_call_filt['Closer Disposition'].value_counts().reset_index()
     disp_counts.columns = ['Disposition', 'Total Appointments']
-
     y_pos = np.arange(len(disp_counts))
     plt.figure(figsize=(10, 6))
     plt.bar(y_pos, disp_counts['Total Appointments'], color='#00a7e1')
@@ -82,7 +801,7 @@ def data():
     st.pyplot(plt)
     plt.close()  # Close the figure to prevent overlapping
 
-#Setter bar chart
+    #  --- Setter bar chart ---
     if not call_disp_filt:
         st.subheader("Total Appointments by Setter")
     else:
@@ -99,11 +818,162 @@ def data():
     plt.tight_layout()
     st.pyplot(plt)
     plt.close()
-    
- #Closer Bar chart
+
+    #  --- Closer Bar chart ---
     if not call_disp_filt:
         st.subheader("Total Appointments by Closer")
-    else:    
+    else:
+        st.subheader(f"Total Appointments and {call_disp_filt} by Closer")
+    closer_counts = df_call_filt['Closer Name'].value_counts().reset_index()
+    closer_counts.columns = ['Closer Name', 'Total Appointments']
+    y_pos = np.arange(len(closer_counts))
+    plt.figure(figsize=(12, 8))
+    plt.bar(y_pos, closer_counts['Total Appointments'], color='#00a7e1')
+    plt.xticks(y_pos, closer_counts['Closer Name'], rotation=45, fontsize=12)  # Set x-ticks to setters
+    plt.xlabel('Closer Name', fontsize=14)
+    plt.ylabel('Total Appointments', fontsize=14)
+    plt.title('Total Appointments by Closer', fontsize=16)
+    plt.tight_layout()
+    st.pyplot(plt)
+    plt.close()
+def generate_csv(df):
+    return df.to_csv(index=False).encode('utf-8')
+
+def disp_percent(counts_og, counts_filt, disp_filt):
+    df = pd.DataFrame()
+    df['Appointments'] = counts_og
+    total_appointments = counts_og.sum()
+
+    if disp_filt:
+        st.subheader(f'Total {disp_filt} for each State')
+        df[f'{disp_filt} Deals'] = counts_filt
+        percent = (counts_filt / counts_og * 100).fillna(0).astype(int).astype(str) + '%'
+        df['Percent'] = percent
+        #Total Row
+        total_filtered_deals = counts_filt.sum()
+        total_percent = (total_filtered_deals / total_appointments * 100).astype(int).astype(str) + '%'
+        total_row = {
+            'Appointments': total_appointments,
+            f'{disp_filt} Deals': total_filtered_deals,
+            'Percent': total_percent
+        }
+    else:
+        st.subheader(f'Total Appts for each State')
+        total_row = {
+            'Appointments': total_appointments,
+        }
+
+    df = df.append(pd.DataFrame(total_row, index=['Total']))
+    st.write(df)
+def month_year_col(df):
+    # Convert the 'Set Date' and 'Close Date' columns to datetime
+    df['Set Date'] = pd.to_datetime(df['Set Date'], errors='coerce')
+    df['Close Date'] = pd.to_datetime(df['Close Date'], errors='coerce')
+
+    # Create a new column 'Actual Date' that uses 'Close Date' or 'Set Date' as a fallback
+    df['Actual Date'] = df['Close Date'].combine_first(df['Set Date'])
+
+    # Drop rows with NaT in 'Actual Date'
+    df = df.dropna(subset=['Actual Date'])
+
+    # Extract month and year for filtering and formatting
+    df['Month_Year'] = df['Actual Date'].dt.strftime('%B %Y')
+
+    return df
+
+
+    '''
+    def data():
+    df = pd.DataFrame(sheet.get_all_records())
+    df_call_filt = df.copy() #should be this if no other filters are applied
+
+    df_call_filt = month_year_col(df_call_filt)
+
+    # --- SIDEBAR ---
+    st.sidebar.header("Please Filter Here:")
+    month_year_filt = st.sidebar.multiselect('Date', options=df_call_filt["Month_Year"].unique())
+    call_disp_filt = st.sidebar.multiselect('Call Dispositions', config.dispositions)
+    states_filt = st.sidebar.multiselect('States', config.states)
+    setter_filt = st.sidebar.multiselect('Setter', config.setters)
+    closer_filt = st.sidebar.multiselect('Closer', config.closers)
+
+
+    # Connecting filters to data
+
+    state_counts_og = df.groupby('State').size().sort_values(ascending=False)
+    if month_year_filt:
+        df_call_filt = df_call_filt[df_call_filt['Month_Year'].isin(month_year_filt)]
+        state_counts_og = df_call_filt.groupby('State').size().sort_values(ascending=False)
+    if setter_filt:
+        df_call_filt = df_call_filt[df_call_filt['Setter Name'].isin(setter_filt)]
+        state_counts_og = df_call_filt.groupby('State').size().sort_values(ascending=False)
+    if closer_filt:
+        df_call_filt = df_call_filt[df_call_filt['Closer Name'].isin(closer_filt)]
+        state_counts_og = df_call_filt.groupby('State').size().sort_values(ascending=False)
+    if states_filt:
+        df_call_filt = df_call_filt[df_call_filt['State'].isin(states_filt)]
+        state_counts_og = df_call_filt.groupby('State').size().sort_values(ascending=False)
+    if call_disp_filt:
+        df_call_filt = df_call_filt[df_call_filt['Closer Disposition'].isin(call_disp_filt)]
+
+    # --- Total appointments per state ---
+    state_counts_filt = df_call_filt.groupby('State').size().sort_values(ascending=False)
+        # Bar chart to show appointments per state
+    y_pos = np.arange(len(state_counts_filt))
+    plt.figure(figsize=(12, 10))
+    plt.bar(y_pos, state_counts_filt.values, color='#00a7e1')
+    plt.xticks(y_pos, state_counts_filt.index, rotation=45, fontsize=12)  # Set x-ticks
+    plt.xlabel('State', fontsize=14)
+    plt.ylabel('Total Appointments', fontsize=14)
+
+    if call_disp_filt:
+        title = f'Total {call_disp_filt} Appointments per State'
+    else:
+        title = 'Total Appointments per State'
+    plt.title(title)
+
+    plt.tight_layout()
+    st.pyplot(plt)
+    plt.close()  # Close the figure to prevent overlapping
+
+    disp_percent(state_counts_og, state_counts_filt, call_disp_filt)
+
+    #  --- Bar chart to show different disps ---
+    disp_counts = df_call_filt['Closer Disposition'].value_counts().reset_index()
+    disp_counts.columns = ['Disposition', 'Total Appointments']
+    y_pos = np.arange(len(disp_counts))
+    plt.figure(figsize=(10, 6))
+    plt.bar(y_pos, disp_counts['Total Appointments'], color='#00a7e1')
+    plt.xticks(y_pos, disp_counts['Disposition'], rotation=45)  # Set x-ticks to dispositions
+    plt.xlabel('Dispositions')
+    plt.ylabel('Total Appointments')
+    plt.title('Total Appointments by Disposition')
+    plt.tight_layout()
+    st.pyplot(plt)
+    plt.close()  # Close the figure to prevent overlapping
+
+    #  --- Setter bar chart ---
+    if not call_disp_filt:
+        st.subheader("Total Appointments by Setter")
+    else:
+        st.subheader(f"Total Appointments and {call_disp_filt} by Setter")
+    setter_counts = df_call_filt['Setter Name'].value_counts().reset_index()
+    setter_counts.columns = ['Setter Name', 'Total Appointments']
+    y_pos = np.arange(len(setter_counts))
+    plt.figure(figsize=(12, 8))
+    plt.bar(y_pos, setter_counts['Total Appointments'], color='#00a7e1')
+    plt.xticks(y_pos, setter_counts['Setter Name'], rotation=45, fontsize=12)  # Set x-ticks to setters
+    plt.xlabel('Setter Name', fontsize=14)
+    plt.ylabel('Total Appointments', fontsize=14)
+    plt.title('Total Appointments by Setter', fontsize=16)
+    plt.tight_layout()
+    st.pyplot(plt)
+    plt.close()
+
+    #  --- Closer Bar chart ---
+    if not call_disp_filt:
+        st.subheader("Total Appointments by Closer")
+    else:
         st.subheader(f"Total Appointments and {call_disp_filt} by Closer")
     closer_counts = df_call_filt['Closer Name'].value_counts().reset_index()
     closer_counts.columns = ['Closer Name', 'Total Appointments']
@@ -119,49 +989,47 @@ def data():
     plt.close()
 
     # TODO: Add a tab to see which names are missing the closer form
-def disp_percent(df, counts, disp_filt, state_filt):
-    if not disp_filt:
-        # If no filter is selected, display a simplified dataframe
-        simplified_df = counts.copy()
-        simplified_df['Total Appts'] = counts['Total Appts'].astype(int)
-        totals_row = pd.DataFrame({'State': ['Total'], 'Total Appts': [counts['Total Appts'].sum()]})
-        simplified_df = pd.concat([simplified_df, totals_row], ignore_index=True)
 
-        # Sort the simplified DataFrame by 'Total Appts' in descending order, keeping the 'Total' row at the bottom
-        simplified_df = simplified_df.sort_values(by='Total Appts', ascending=False, ignore_index=True)
-        simplified_df.loc[simplified_df['State'] == 'Total', 'Total Appts'] = simplified_df['Total Appts'].sum()
 
-        # Display the simplified dataframe
-        st.write("Total Appts for each State:")
-        st.table(simplified_df.set_index('State'))
+def month_year_col(df):
+    # Convert the 'Set Date' and 'Close Date' columns to datetime
+    df['Set Date'] = pd.to_datetime(df['Set Date'], errors='coerce')
+    df['Close Date'] = pd.to_datetime(df['Close Date'], errors='coerce')
 
-        return
+    # Create a new column 'Actual Date' that uses 'Close Date' or 'Set Date' as a fallback
+    df['Actual Date'] = df['Close Date'].combine_first(df['Set Date'])
 
-    # Merge total and filtered deals dfs
-    merged_df = pd.merge(counts, state_filt, on='State', how='left')
+    # Drop rows with NaT in 'Actual Date'
+    df = df.dropna(subset=['Actual Date'])
 
-    # Ensure 'Filtered Deals' column exists
-    if 'Filtered Deals' not in merged_df.columns:
-        merged_df['Filtered Deals'] = 0
+    # Extract month and year for filtering and formatting
+    df['Month_Year'] = df['Actual Date'].dt.strftime('%B %Y')
 
-    # Calculate percentage of filtered deals and round to nearest whole number
-    merged_df['Percent'] = (merged_df['Filtered Deals'] / merged_df['Total Appts'] * 100).fillna(0).astype(int).astype(str) + '%'
+    return df
+def disp_percent(counts_og, counts_filt, disp_filt):
+    df = pd.DataFrame()
+    df['Appointments'] = counts_og
+    total_appointments = counts_og.sum()
 
-    # Add a row for totals
-    totals_row = pd.DataFrame({'State': ['Total'], 
-                               'Total Appts': [merged_df['Total Appts'].sum()], 
-                               'Filtered Deals': [merged_df['Filtered Deals'].sum()]})
-    totals_row['Percent'] = (totals_row['Filtered Deals'] / totals_row['Total Appts'] * 100).fillna(0).astype(int).astype(str) + '%'
+    if disp_filt:
+        st.subheader(f'Total {disp_filt} for each State')
+        df[f'{disp_filt} Deals'] = counts_filt
+        percent = (counts_filt / counts_og * 100).fillna(0).astype(int).astype(str) + '%'
+        df['Percent'] = percent
+        #Total Row
+        total_filtered_deals = counts_filt.sum()
+        total_percent = (total_filtered_deals / total_appointments * 100).astype(int).astype(str) + '%'
+        total_row = {
+            'Appointments': total_appointments,
+            f'{disp_filt} Deals': total_filtered_deals,
+            'Percent': total_percent
+        }
+    else:
+        st.subheader(f'Total Appts for each State')
+        total_row = {
+            'Appointments': total_appointments,
+        }
 
-    # Append totals row to the DataFrame
-    merged_df = pd.concat([merged_df, totals_row], ignore_index=True)
-
-    # Sort the DataFrame by 'Total Appts' in descending order, keeping the 'Total' row at the bottom
-    sorted_df = merged_df.sort_values(by='Total Appts', ascending=False, ignore_index=True)
-    sorted_df.loc[sorted_df['State'] == 'Total', 'Total Appts'] = merged_df['Total Appts'].sum()
-    sorted_df.loc[sorted_df['State'] == 'Total', 'Filtered Deals'] = merged_df['Filtered Deals'].sum()
-    sorted_df.loc[sorted_df['State'] == 'Total', 'Percent'] = totals_row['Percent'].values[0]
-
-    # Display the merged dataframe
-    st.write(f"Total and {disp_filt} with Percent for each State:")
-    st.table(sorted_df.set_index('State'))
+    df = df.append(pd.DataFrame(total_row, index=['Total']))
+    st.write(df)
+    '''
