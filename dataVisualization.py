@@ -10,26 +10,23 @@ import database
 import config
 
 sheet = database.sheet
-#AMP_Logo_Blue = r"C:\Users\boden\PycharmProjects\DataPersonalProject\AMP_Logo_Blue.png"
-
+AMP_Logo_Blue = "images/AMP_Logo.png"
 
 def data():
     df = pd.DataFrame(sheet.get_all_records())
     df_call_filt = df.copy()  # should be this if no other filters are applied
     df_call_filt = month_year_col(df_call_filt)
 
-    #st.sidebar.image(AMP_Logo_Blue, width=100)
+    st.sidebar.image(AMP_Logo_Blue, width=100)
     st.sidebar.header("Please Filter Here:")
     data_options = st.sidebar.selectbox('Choose which Dashboard to see', options = ['Team', 'Closer', 'Setter', 'Detailed Data'])
     month_year_filt = st.sidebar.multiselect('Date', options=df_call_filt["Month_Year"].unique())
     if month_year_filt:
         df_call_filt = df_call_filt[df_call_filt['Month_Year'].isin(month_year_filt)]
-    #csv_button = st.sidebar.button('Click to generate list of non-recorded appts')
     st.title(f"{data_options} Dashboard")
     st.markdown("---")
 
     st.sidebar.markdown("---")
-    #st.sidebar.markdown("###")
 
 
     if data_options == 'Team':
