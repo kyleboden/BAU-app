@@ -20,7 +20,8 @@ def round_to_nearest_15(minutes):
     return 15 * round(minutes / 15)
 
 def get_nearest_15_minute_time():
-    now = datetime.datetime.now()
+    timezone = pytz.timezone('America/Denver')  # MDT timezone
+    now = datetime.datetime.now(timezone)
     rounded_minute = 15 * round(now.minute / 15)
     if rounded_minute == 60:
         rounded_minute = 0
