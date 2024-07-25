@@ -1,5 +1,7 @@
 import calendar  # Core Python Module
 import streamlit as st  # pip install streamlit
+import datetime  # Core Python Module
+import pytz
 
 page_title = "AMP Smart BAU Form"
 page_icon = ":money_with_wings:"  # emojis: https://www.webfx.com/tools/emoji-cheat-sheet/
@@ -48,6 +50,15 @@ percent_offset = ''
 
 
 
+def get_nearest_15_minute_time():
+    timezone = pytz.timezone('America/Denver')  # MDT timezone
+    now = datetime.datetime.now(timezone)
+    rounded_minute = 15 * round(now.minute / 15)
+    if rounded_minute == 60:
+        rounded_minute = 0
+        now += datetime.timedelta(hours=1)
+    return datetime.time(now.hour, rounded_minute)
+
 # --- DROP DOWN VALUES FOR SELECTING THE PERIOD ---
 #years = [datetime.today().year, datetime.today().year + 1]
 months = list(calendar.month_name[1:])
@@ -61,3 +72,5 @@ hide_st_style = """
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
+
+
