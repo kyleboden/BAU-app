@@ -15,7 +15,7 @@ def set_form():
             config.set_date = st.date_input("", value=datetime.date.today()).isoformat()
         with set_col2:
             s.questionCSS("Time you called")
-            config.set_time = st.time_input("", value=config.get_nearest_15_minute_time().isoformat()
+            config.set_time = st.time_input("", value=config.get_nearest_15_minute_time().isoformat())
         # ub file uploader
         #s.questionCSS("Upload Utility Bill here")
         #ub_file = st.file_uploader(label='')
