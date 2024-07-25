@@ -15,7 +15,18 @@ def reset_form():
     for key in st.session_state.keys():
         del st.session_state[key]
     st.experimental_rerun()
+    
+def round_to_nearest_15(minutes):
+    return 15 * round(minutes / 15)
 
+def get_nearest_15_minute_time():
+    now = datetime.datetime.now()
+    rounded_minute = 15 * round(now.minute / 15)
+    if rounded_minute == 60:
+        rounded_minute = 0
+        now += datetime.timedelta(hours=1)
+    return datetime.time(now.hour, rounded_minute)
+    
 def close_form():
     if 'visible' not in st.session_state:
         st.session_state.visible = False
@@ -24,7 +35,7 @@ def close_form():
     if 'close_date' not in st.session_state:
         st.session_state.close_date = datetime.date.today()
     if 'close_time' not in st.session_state:
-        st.session_state.close_time = datetime.time(14, 00)
+        st.session_state.close_time = get_nearest_15_minute_time()
     if 'on_time' not in st.session_state:
         st.session_state.on_time = 'Yes'
     if 'cx_email' not in st.session_state:
