@@ -8,6 +8,8 @@ import setForm
 import closeForm
 
 st.title(config.page_title + " " + config.page_icon)
+AMP_Logo = "images/AMP_Logo.png"
+
 # --- NAVIGATION MENU ---
 selected = option_menu(
     menu_title=None,
