@@ -26,7 +26,7 @@ def close_form():
     if 'close_date' not in st.session_state:
         st.session_state.close_date = datetime.date.today()
     if 'close_time' not in st.session_state:
-        st.session_state.close_time = congifg.get_nearest_15_minute_time()
+        st.session_state.close_time = config.get_nearest_15_minute_time()
     if 'on_time' not in st.session_state:
         st.session_state.on_time = 'Yes'
     if 'cx_email' not in st.session_state:
