@@ -10,7 +10,7 @@ import database
 import config
 
 sheet = database.sheet
-AMP_Logo_Blue = r"C:\Users\boden\PycharmProjects\DataPersonalProject\AMP_Logo_Blue.png"
+#AMP_Logo_Blue = r"C:\Users\boden\PycharmProjects\DataPersonalProject\AMP_Logo_Blue.png"
 
 
 def data():
@@ -18,7 +18,7 @@ def data():
     df_call_filt = df.copy()  # should be this if no other filters are applied
     df_call_filt = month_year_col(df_call_filt)
 
-    st.sidebar.image(AMP_Logo_Blue, width=100)
+    #st.sidebar.image(AMP_Logo_Blue, width=100)
     st.sidebar.header("Please Filter Here:")
     data_options = st.sidebar.selectbox('Choose which Dashboard to see', options = ['Team', 'Closer', 'Setter', 'Detailed Data'])
     month_year_filt = st.sidebar.multiselect('Date', options=df_call_filt["Month_Year"].unique())
