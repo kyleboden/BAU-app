@@ -7,9 +7,9 @@ import dataVisualization
 import setForm
 import closeForm
 
-st.title(config.page_title + " " + config.page_icon)
 AMP_Logo = "images/AMP_Logo.png"
 st.image(AMP_Logo, width=300)
+st.title(config.page_title + " " + config.page_icon)
 
 # --- NAVIGATION MENU ---
 selected = option_menu(
