@@ -1,4 +1,3 @@
-import config
 from streamlit_option_menu import option_menu  # pip install streamlit-option-menu
 import streamlit as st
 
@@ -8,6 +7,9 @@ import closeForm
 
 st.set_page_config(page_title="BAU", page_icon='☀️')
 st.title(config.page_title + " " + config.page_icon)
+
+import config
+
 
 # --- NAVIGATION MENU ---
 selected = option_menu(
