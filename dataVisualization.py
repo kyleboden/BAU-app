@@ -10,7 +10,11 @@ import database
 import config
 
 sheet = database.sheet
-AMP_Logo_Blue = "images/AMP_Logo_Blue.png"
+AMP_Logo_Blue = r"C:\Users\boden\PycharmProjects\DataPersonalProject\AMP_Logo_Blue.png"
+# Define the time blocks and reindex the data
+time_blocks = pd.date_range("08:00", "18:00", freq="60T").time
+time_blocks_str = [t.strftime("%H:%M:%S") for t in time_blocks]
+time_blocks = [pd.to_datetime(t).time() for t in time_blocks_str]
 
 def data():
     df = pd.DataFrame(sheet.get_all_records())
@@ -23,11 +27,16 @@ def data():
     month_year_filt = st.sidebar.multiselect('Date', options=df_call_filt["Month_Year"].unique())
     if month_year_filt:
         df_call_filt = df_call_filt[df_call_filt['Month_Year'].isin(month_year_filt)]
-    st.title(f"{data_options} Dashboard")
+
+    #csv_button = st.sidebar.button('Click to generate list of non-recorded appts')
+    st.title(f"{data_options} Dashboard{' - ' + ', '.join(month_year_filt) if month_year_filt else ''}")
     st.markdown("---")
 
     st.sidebar.markdown("---")
+    #st.sidebar.markdown("###")
 
+    df_call_filt['Set Time'] = pd.to_datetime(df_call_filt['Set Time']).dt.round('60min').dt.time
+    df_call_filt['Close Time'] = pd.to_datetime(df_call_filt['Close Time']).dt.round('60min').dt.time
 
     if data_options == 'Team':
         t_dashboard(df_call_filt)
@@ -52,6 +61,10 @@ def data():
 
 
 def t_dashboard(df):
+
+
+
+
     #KPI's
     total_sets = len(df)
     total_sets_happened = (df['Closer Disposition'] != '').sum()
@@ -59,6 +72,8 @@ def t_dashboard(df):
     total_nosits = (df['Closer Disposition'] == 'No Sit').sum()
     total_sits = total_sets_happened - total_nosits # maybe - reschedules
     total_close = (df['Closer Disposition'] == 'Closed').sum()
+
+
     #st.write(total_close)
 
     left_col, middle_col, right_col = st.columns(3)
@@ -98,6 +113,7 @@ def t_dashboard(df):
     # --- BAR CHARTS ---
     closes_df = df[df['Closer Disposition'] == 'Closed']
     noSits_df = df[df['Closer Disposition'] == 'No Sit']
+
     # Closes by Close Bar
     closes_by_closer = closes_df.groupby('Closer Name').size().sort_values(ascending=False)
     #st.bar_chart(closes_by_closer)
@@ -177,44 +193,45 @@ def t_dashboard(df):
     st.markdown("---")
     left_col, right_col = st.columns(2)
 
-
-    time_set_s = df.groupby('Set Time').size()
-    time_close_c = closes_df.groupby('Close Time').size()
+    time_set_s = df.groupby('Set Time').size().reindex(time_blocks, fill_value=0)
+    time_close_c = closes_df.groupby('Close Time').size().reindex(time_blocks, fill_value=0)
     #time_set_close = closes_df.groupby('Set Time').size()
-    time_noSit_c = noSits_df.groupby('Close Time').size()
-    time_appts_c = total_happened_df.groupby('Close Time').size()
+    time_noSit_c = noSits_df.groupby('Set Time').size().reindex(time_blocks, fill_value=0)
+    time_appts_c = total_happened_df.groupby('Close Time').size().reindex(time_blocks, fill_value=0)
+
 
     fig_time_set_s = px.bar(
-        time_set_s,
-        x=time_set_s.index,
+        x=[t.strftime("%H:%M") for t in time_set_s.index],
         y=time_set_s.values,
-        orientation="v",
         title="<b>Sets by Time of Day</b>",
         color_discrete_sequence=["#2fddff"] * len(time_set_s),
-        labels={"y": "Number of Sets"}
+        labels={"y": "Number of Sets", "x": "Time of Day"}
     )
     fig_time_set_s.update_layout(
         xaxis_title=None,
         title_x=0.5
     )
 
+    """
     fig_time_close_c = px.bar(
-        time_close_c,
-        x=time_close_c.index,
+        x=[t.strftime("%H:%M") for t in time_close_c.index],
         y=time_close_c.values,
-        orientation="v",
         title="<b>Closes by Time of Day</b>",
         color_discrete_sequence=["#2fddff"] * len(time_close_c),
-        labels={"y": "Number of Closes"}
+        labels={"y": "Number of Closes", "x": "Time of Day"}
     )
     fig_time_close_c.update_layout(
         xaxis_title=None,
         title_x=0.5
     )
+    """
+
+    # Closer time close appts no sit chart
+    fig_time_appt_noSit = plot_ns_c_appt(time_appts_c,time_noSit_c,time_close_c)
 
     fig_time_noSit_c = px.bar(
         time_noSit_c,
-        x=time_noSit_c.index,
+        x=[t.strftime("%H:%M") for t in time_noSit_c.index],
         y=time_noSit_c.values,
         orientation="v",
         title="<b>No Sits by Time of Day</b>",
@@ -242,10 +259,10 @@ def t_dashboard(df):
     )
     """
 
-
+    """
     fig_time_appts_c = px.bar(
         time_appts_c,
-        x=time_appts_c.index,
+        x=[t.strftime("%H:%M") for t in time_appts_c.index],
         y=time_appts_c.values,
         orientation="v",
         title="<b>Time of Closer Appts</b>",
@@ -256,11 +273,17 @@ def t_dashboard(df):
         xaxis_title=None,
         title_x=0.5
     )
+    """
 
-    left_col.plotly_chart(fig_time_set_s, use_container_width=True)
-    right_col.plotly_chart(fig_time_noSit_c, use_container_width=True)
-    left_col.plotly_chart(fig_time_close_c, use_container_width=True)
-    right_col.plotly_chart(fig_time_appts_c, use_container_width=True)
+
+    #left_col.plotly_chart(fig_time_set_s, use_container_width=True)
+    st.plotly_chart(fig_time_set_s, use_container_width=True)
+    #right_col.plotly_chart(fig_time_noSit_c, use_container_width=True)
+    #with left_col:
+    st.pyplot(fig_time_appt_noSit)
+    #left_col.plotly_chart(fig_time_close_c, use_container_width=True)
+    #right_col.plotly_chart(fig_time_close_c, use_container_width=True)
+    #right_col.plotly_chart(fig_time_appts_c, use_container_width=True)
     #right_col.plotly_chart(fig_time_set_close, use_container_width=True)
 
 
@@ -278,7 +301,6 @@ def c_dashboard(df):
         """,
         unsafe_allow_html=True
     )
-
 
     #KPI's
     total_sets = len(df)
@@ -334,23 +356,6 @@ def c_dashboard(df):
             unsafe_allow_html=True
         )
 
-    # Closes by Disp Bar
-    closes_by_disp = total_happened_df.groupby('Closer Disposition').size().sort_values(ascending=True)
-    fig_closes_disp = px.bar(title="<b>Call Disposition</b>")
-    if not closes_by_disp.empty:
-        fig_closes_disp = px.bar(
-            closes_by_disp,
-            y=closes_by_disp.index,
-            x=closes_by_disp.values,
-            orientation="h",
-            title="<b>Call Disposition</b>",
-            color_discrete_sequence=["#2fddff"] * len(closes_by_disp),
-            labels={"x": "Number of Appts","y": "Call Disposition"}
-        )
-        fig_closes_disp.update_layout(
-            title_x=0.5
-        )
-
     # Closes by Setter Bar
     closes_by_setter = closes_df.groupby('Setter Name').size().sort_values(ascending=False)
     fig_closes_setter = px.bar(title="<b>Closes by Setter</b>")
@@ -360,16 +365,35 @@ def c_dashboard(df):
             x=closes_by_setter.index,
             y=closes_by_setter.values,
             orientation="v",
-            title="<b>Closes by Setter</b>",
+            title=f"<b>{closer_name}'s Closes by Closer</b>" if closer_name != 'Select a Closer' else "<b>Closes by Setter</b>",
             color_discrete_sequence=["#2fddff"] * len(closes_by_setter),
             labels={"y": "Number of Closes"}
         )
         fig_closes_setter.update_layout(
             xaxis_title=None,
+            title_xanchor='center',  # Anchor the title to its center
             title_x=0.5
         )
-    # Closes by Time Bar
 
+    # Closes by Disp Bar
+    closes_by_disp = total_happened_df.groupby('Closer Disposition').size().sort_values(ascending=True)
+    fig_closes_disp = px.bar(title="<b>Call Disposition</b>")
+    if not closes_by_disp.empty:
+        fig_closes_disp = px.bar(
+            closes_by_disp,
+            y=closes_by_disp.index,
+            x=closes_by_disp.values,
+            orientation="h",
+            title=f"<b>{closer_name}'s Call Disposition</b>" if closer_name != 'Select a Closer' else "<b>Call Disposition</b>",
+            color_discrete_sequence=["#2fddff"] * len(closes_by_disp),
+            labels={"x": "Number of Appts","y": "Call Disposition"}
+        )
+        fig_closes_disp.update_layout(
+            title_xanchor='center',  # Anchor the title to its center
+            title_x=0.5
+        )
+
+    # Closes by Time Bar
     closes_df.set_index('Close Date', inplace=True)
     closes_by_week = closes_df.resample('W').size()
 
@@ -378,10 +402,10 @@ def c_dashboard(df):
         fig_closes_by_time = px.line(
             x=closes_by_week.index,
             y=closes_by_week.values,
-            title="<b>Closes over Time (Weekly)</b>",
+            title=f"<b>{closer_name}'s Closes over Time (Weekly)</b>" if closer_name != 'Select a Closer' else "<b>Closes over Time (Weekly)</b>",
             labels={"x": "Date", "y": "Number of Closes"}
         )
-        fig_closes_by_time.update_layout(title_x=0.5)
+        fig_closes_by_time.update_layout(title_xanchor='center',title_x=0.5, xaxis_title=None)
         fig_closes_by_time.update_traces(line=dict(color="#2fddff", width=3))
 
         # Display the note and the graph
@@ -406,12 +430,13 @@ def c_dashboard(df):
             y=closes_by_state.index,
             x=closes_by_state.values,
             orientation="h",
-            title="<b>Closes by State</b>",
+            title=f"<b>{closer_name}'s Closes by State</b>" if closer_name != 'Select a Closer' else "<b>Closes by State</b>",
             color_discrete_sequence=["#2fddff"] * len(closes_by_state),
             labels = {"x": "Number of Closes", "y": "State"}
 
         )
         fig_closes_by_state.update_layout(
+            title_xanchor='center',  # Anchor the title to its center
             title_x=0.5
         )
 
@@ -421,19 +446,24 @@ def c_dashboard(df):
     right_col.plotly_chart(fig_closes_by_time, use_container_width=True)
     right_col.plotly_chart(fig_closes_by_state, use_container_width=True)
 
-
+    #--- Time of day ---
     st.markdown("---")
-    st.header("Time of Day Charts")
+    st.header(f"Time of Day Charts for {closer_name}" if closer_name != "Select a Closer" else "Time of Day Charts rfor Closers")
     st.markdown("---")
     left_col, right_col = st.columns(2)
 
 
-    time_set_s = df.groupby('Set Time').size()
-    time_close_c = closes_df.groupby('Close Time').size()
+    time_set_s = df.groupby('Set Time').size().reindex(time_blocks, fill_value=0)
+    time_close_c = closes_df.groupby('Close Time').size().reindex(time_blocks, fill_value=0)
     #time_set_close = closes_df.groupby('Set Time').size()
-    time_noSit_c = noSits_df.groupby('Close Time').size()
-    time_appts_c = total_happened_df.groupby('Close Time').size()
+    time_noSit_c = noSits_df.groupby('Close Time').size().reindex(time_blocks, fill_value=0)
+    time_appts_c = total_happened_df.groupby('Close Time').size().reindex(time_blocks, fill_value=0)
 
+
+    # Closer time close appts no sit chart
+    fig_time_appt_noSit = plot_ns_c_appt(time_appts_c,time_noSit_c,time_close_c)
+
+    """
     fig_time_set_s = px.bar(title="<b>Appts by Time of Day</b>")
     if not time_set_s.empty:
         fig_time_set_s = px.bar(
@@ -449,8 +479,9 @@ def c_dashboard(df):
             xaxis_title=None,
             title_x=0.5
         )
-    left_col.plotly_chart(fig_time_set_s, use_container_width=True)
+    """
 
+    """
     fig_time_close_c = px.bar(title="<b>Closes by Time of Day</b>")
     if not time_close_c.empty:
         fig_time_close_c = px.bar(
@@ -466,7 +497,10 @@ def c_dashboard(df):
             xaxis_title=None,
             title_x=0.5
         )
+    """
 
+
+    """
     fig_time_noSit_c = px.bar(title="<b>No Sits by Time of Day</b>")
     if not time_noSit_c.empty:
         fig_time_noSit_c = px.bar(
@@ -482,10 +516,12 @@ def c_dashboard(df):
             xaxis_title=None,
             title_x=0.5
         )
+    """
 
-
-    right_col.plotly_chart(fig_time_noSit_c, use_container_width=True)
-    left_col.plotly_chart(fig_time_close_c, use_container_width=True)
+    st.pyplot(fig_time_appt_noSit)
+    #left_col.plotly_chart(fig_time_set_s, use_container_width=True)
+    #right_col.plotly_chart(fig_time_noSit_c, use_container_width=True)
+    #left_col.plotly_chart(fig_time_close_c, use_container_width=True)
     #right_col.plotly_chart(fig_time_appts_c, use_container_width=True)
     #right_col.plotly_chart(fig_time_set_close, use_container_width=True)
 
@@ -560,22 +596,7 @@ def s_dashboard(df):
             unsafe_allow_html=True
         )
 
-    # Closes by Disp Bar
-    closes_by_disp = total_happened_df.groupby('Closer Disposition').size().sort_values(ascending=True)
-    fig_closes_disp = px.bar(title="<b>Call Disposition</b>")
-    if not closes_by_disp.empty:
-        fig_closes_disp = px.bar(
-            closes_by_disp,
-            y=closes_by_disp.index,
-            x=closes_by_disp.values,
-            orientation="h",
-            title="<b>Call Disposition</b>",
-            color_discrete_sequence=["#2fddff"] * len(closes_by_disp),
-            labels={"x": "Number of Appts","y": "Call Disposition"}
-        )
-        fig_closes_disp.update_layout(
-            title_x=0.5
-        )
+
 
     # Closes by Close Bar
     closes_by_closer = closes_df.groupby('Closer Name').size().sort_values(ascending=False)
@@ -586,16 +607,35 @@ def s_dashboard(df):
             x=closes_by_closer.index,
             y=closes_by_closer.values,
             orientation="v",
-            title="<b>Closes by Closer</b>",
+            title=f"<b>{setter_name}'s Closes by Closer</b>" if setter_name != 'Select a Setter' else "<b>Closes by Closer</b>",
             color_discrete_sequence=["#2fddff"] * len(closes_by_closer),
             labels={"y": "Number of Closes"}
         )
         fig_closes_closer.update_layout(
             xaxis_title=None,
+            title_xanchor='center',  # Anchor the title to its center
             title_x=0.5
         )
-    # Closes by Time Bar
 
+    # Closes by Disp Bar
+    closes_by_disp = total_happened_df.groupby('Closer Disposition').size().sort_values(ascending=True)
+    fig_closes_disp = px.bar(title="<b>Call Disposition</b>")
+    if not closes_by_disp.empty:
+        fig_closes_disp = px.bar(
+            closes_by_disp,
+            y=closes_by_disp.index,
+            x=closes_by_disp.values,
+            orientation="h",
+            title=f"<b>{setter_name}'s Call Disposition</b>" if setter_name != 'Select a Setter' else "<b>Call Disposition</b>",
+            color_discrete_sequence=["#2fddff"] * len(closes_by_disp),
+            labels={"x": "Number of Appts","y": "Call Disposition"}
+        )
+        fig_closes_disp.update_layout(
+            title_xanchor='center',  # Anchor the title to its center
+            title_x=0.5
+        )
+
+    # Closes by Time Bar
     closes_df.set_index('Close Date', inplace=True)
     closes_by_week = closes_df.resample('W').size()
 
@@ -604,10 +644,10 @@ def s_dashboard(df):
         fig_closes_by_time = px.line(
             x=closes_by_week.index,
             y=closes_by_week.values,
-            title="<b>Closes over Time (Weekly)</b>",
+            title=f"<b>{setter_name}'s Closes over Time (Weekly)</b>" if setter_name != 'Select a Setter' else "<b>Closes over Time (Weekly)</b>",
             labels={"x": "Date", "y": "Number of Closes"}
         )
-        fig_closes_by_time.update_layout(title_x=0.5)
+        fig_closes_by_time.update_layout(title_xanchor='center', title_x=0.5, xaxis_title=None)
         fig_closes_by_time.update_traces(line=dict(color="#2fddff", width=3))
 
         # Display the note and the graph
@@ -632,12 +672,13 @@ def s_dashboard(df):
             y=closes_by_state.index,
             x=closes_by_state.values,
             orientation="h",
-            title="<b>Closes by State</b>",
+            title=f"<b>{setter_name}'s Closes by State</b>" if setter_name != 'Select a Setter' else "<b>Closes by State</b>",
             color_discrete_sequence=["#2fddff"] * len(closes_by_state),
             labels = {"x": "Number of Closes", "y": "State"}
 
         )
         fig_closes_by_state.update_layout(
+            title_xanchor='center',  # Anchor the title to its center
             title_x=0.5
         )
 
@@ -649,86 +690,103 @@ def s_dashboard(df):
 
 
     st.markdown("---")
-    st.header("Time of Day Charts")
+    st.header(f"Time of Day Charts for {setter_name}" if setter_name != "Select a Setter" else "Time of Day Charts for Setters")
     st.markdown("---")
     left_col, right_col = st.columns(2)
 
 
-    time_set_s = df.groupby('Set Time').size()
-    time_close_c = closes_df.groupby('Close Time').size()
+    time_set_s = df.groupby('Set Time').size().reindex(time_blocks, fill_value=0)
+    time_close_c = closes_df.groupby('Close Time').size().reindex(time_blocks, fill_value=0)
     #time_set_close = closes_df.groupby('Set Time').size()
-    time_noSit_c = noSits_df.groupby('Close Time').size()
-    time_appts_c = total_happened_df.groupby('Close Time').size()
+    time_noSit_c = noSits_df.groupby('Close Time').size().reindex(time_blocks, fill_value=0)
+    time_appts_c = total_happened_df.groupby('Close Time').size().reindex(time_blocks, fill_value=0)
 
-    fig_time_set_s = px.bar(title="<b>Sets by Time of Day</b>")
-    if not time_set_s.empty:
-        fig_time_set_s = px.bar(
-            time_set_s,
-            x=time_set_s.index,
-            y=time_set_s.values,
-            orientation="v",
-            title="<b>Sets by Time of Day</b>",
-            color_discrete_sequence=["#2fddff"] * len(time_set_s),
-            labels={"y": "Number of Sets"}
-        )
-        fig_time_set_s.update_layout(
-            xaxis_title=None,
-            title_x=0.5
-        )
-    left_col.plotly_chart(fig_time_set_s, use_container_width=True)
+    fig_time_set_s = px.bar(
+        x=[t.strftime("%H:%M") for t in time_set_s.index],
+        y=time_set_s.values,
+        title=f"<b>{setter_name}'s Sets by Time of Day</b>" if setter_name != 'Select a Setter' else "<b>Sets by Time of Day</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_set_s),
+        labels={"y": "Number of Sets", "x": "Time of Day"}
+    )
+    fig_time_set_s.update_layout(
+        xaxis_title=None,
+        title_xanchor='center',  # Anchor the title to its center
+        title_x=0.5
+    )
 
-    fig_time_close_c = px.bar(title="<b>Closes by Time of Day</b>")
-    if not time_close_c.empty:
-        fig_time_close_c = px.bar(
-            time_close_c,
-            x=time_close_c.index,
-            y=time_close_c.values,
-            orientation="v",
-            title="<b>Closes by Time of Day</b>",
-            color_discrete_sequence=["#2fddff"] * len(time_close_c),
-            labels={"y": "Number of Closes"}
-        )
-        fig_time_close_c.update_layout(
-            xaxis_title=None,
-            title_x=0.5
-        )
+    """
+    fig_time_close_c = px.bar(
+        x=[t.strftime("%H:%M") for t in time_close_c.index],
+        y=time_close_c.values,
+        title="<b>Closes by Time of Day</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_close_c),
+        labels={"y": "Number of Closes", "x": "Time of Day"}
+    )
+    fig_time_close_c.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+    """
 
-    fig_time_noSit_c = px.bar(title="<b>No Sits by Time of Day</b>")
-    if not time_noSit_c.empty:
-        fig_time_noSit_c = px.bar(
-            time_noSit_c,
-            x=time_noSit_c.index,
-            y=time_noSit_c.values,
-            orientation="v",
-            title="<b>No Sits by Time of Day</b>",
-            color_discrete_sequence=["#2fddff"] * len(time_noSit_c),
-            labels={"y": "Number of No Sits"}
-        )
-        fig_time_noSit_c.update_layout(
-            xaxis_title=None,
-            title_x=0.5
-        )
+    # Closer time close appts no sit chart
+    fig_time_appt_noSit = plot_ns_c_appt(time_appts_c, time_noSit_c, time_close_c)
 
-    fig_time_appts_c = px.bar(title="<b>Time of Closer Appts</b>")
-    if not time_noSit_c.empty:
-        fig_time_appts_c = px.bar(
-            time_noSit_c,
-            x=time_noSit_c.index,
-            y=time_noSit_c.values,
-            orientation="v",
-            title="<b>Time of Closer Appts</b>",
-            color_discrete_sequence=["#2fddff"] * len(time_noSit_c),
-            labels={"y": "Number of Appts"}
-        )
-        fig_time_appts_c.update_layout(
-            xaxis_title=None,
-            title_x=0.5
-        )
+    fig_time_noSit_c = px.bar(
+        time_noSit_c,
+        x=[t.strftime("%H:%M") for t in time_noSit_c.index],
+        y=time_noSit_c.values,
+        orientation="v",
+        title="<b>No Sits by Time of Day</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_noSit_c),
+        labels={"y": "Number of No Sits"}
+    )
+    fig_time_noSit_c.update_layout(
+        xaxis_title=None,
+        title_xanchor='center',  # Anchor the title to its center
+        title_x=0.5
+    )
 
-    right_col.plotly_chart(fig_time_noSit_c, use_container_width=True)
-    left_col.plotly_chart(fig_time_close_c, use_container_width=True)
-    right_col.plotly_chart(fig_time_appts_c, use_container_width=True)
-    #right_col.plotly_chart(fig_time_set_close, use_container_width=True)
+    """
+    fig_time_set_close = px.bar(
+        time_set_close,
+        x=time_set_close.index,
+        y=time_set_close.values,
+        orientation="v",
+        title="<b>Closes by Time Appt Was Set</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_set_close),
+        labels={"y": "Number of Closes"}
+    )
+    fig_time_set_close.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+    """
+
+    """
+    fig_time_appts_c = px.bar(
+        time_appts_c,
+        x=[t.strftime("%H:%M") for t in time_appts_c.index],
+        y=time_appts_c.values,
+        orientation="v",
+        title="<b>Time of Closer Appts</b>",
+        color_discrete_sequence=["#2fddff"] * len(time_appts_c),
+        labels={"y": "Number of Appts"}
+    )
+    fig_time_appts_c.update_layout(
+        xaxis_title=None,
+        title_x=0.5
+    )
+    """
+
+    # left_col.plotly_chart(fig_time_set_s, use_container_width=True)
+    st.plotly_chart(fig_time_set_s, use_container_width=True)
+    # right_col.plotly_chart(fig_time_noSit_c, use_container_width=True)
+    # with left_col:
+    st.pyplot(fig_time_appt_noSit)
+    # left_col.plotly_chart(fig_time_close_c, use_container_width=True)
+    # right_col.plotly_chart(fig_time_close_c, use_container_width=True)
+    # right_col.plotly_chart(fig_time_appts_c, use_container_width=True)
+    # right_col.plotly_chart(fig_time_set_close, use_container_width=True)
 
 def d_dashboard(df, month_year_filt):
     #df = pd.DataFrame(sheet.get_all_records())
@@ -833,6 +891,60 @@ def d_dashboard(df, month_year_filt):
     plt.tight_layout()
     st.pyplot(plt)
     plt.close()
+
+def plot_ns_c_appt(time_appts_c,time_noSit_c,time_close_c):
+    # Combined Appts and no sit chart
+    percentage_no_sit = (time_noSit_c / time_appts_c) * 100
+    percentage_no_sit = percentage_no_sit.fillna(0)  # Handle division by zero
+
+    percentage_closed = (time_close_c / time_appts_c) * 100
+    percentage_closed = percentage_closed.fillna(0)  # Handle division by zero
+
+    fig_time_appt_noSit, ax1 = plt.subplots(figsize=(16, 8))
+    fig_time_appt_noSit.patch.set_alpha(0.0)
+    ax1.set_facecolor('none')
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
+    # Bar chart for number of appointments
+    ax1.bar(
+        [t.strftime("%H:%M") for t in time_appts_c.index],
+        time_appts_c.values,
+        color="#2fddff",
+        label="Number of Appts"
+    )
+    ax1.set_ylabel("Number of Appts", fontsize = 16)
+    ax1.tick_params(axis='x', labelsize=14)  # Set font size for x-axis labels
+
+    # Secondary y-axis for percentage of no sits
+    ax2 = ax1.twinx()
+    ax2.plot(
+        [t.strftime("%H:%M") for t in percentage_no_sit.index],
+        percentage_no_sit.values,
+        color="#ff6347",
+        marker='o',
+        label="Percentage of No Sits"
+    )
+    ax2.set_ylabel("Percentage of No Sits", fontsize = 16)
+    ax2.set_ylim(0, 100)  # Set limits for percentage
+
+    ax2.plot(
+        [t.strftime("%H:%M") for t in percentage_closed.index],
+        percentage_closed.values,
+        color="#4682b4",
+        marker='s',
+        linestyle='--',
+        label="Percentage of Closed"
+    )
+    ax2.set_ylabel("Percentage", fontsize=16)
+    ax2.set_ylim(0, 100)  # Set limits for percentage
+
+    plt.title("Time of Closer Appts with Percentage of No Sits and Closed", fontsize=18, weight='bold', pad=50)
+    fig_time_appt_noSit.tight_layout()
+    #plt.show()
+    ax1.legend(loc='upper left')
+    ax2.legend(loc='upper right')
+
+    return  fig_time_appt_noSit
 def generate_csv(df):
     return df.to_csv(index=False).encode('utf-8')
 
