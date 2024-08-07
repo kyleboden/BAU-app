@@ -63,17 +63,17 @@ def data():
     password = st.sidebar.text_input("Enter password to generate the list:", type="password")
     
     # Check if the password is correct
-if password == password_from_secrets:
-    csv_data = generate_csv(nonrecord_apts_df)
-    b64 = base64.b64encode(csv_data).decode()
-    download_link = f'<a href="data:file/csv;base64,{b64}" download="unrecorded_appts_{date.today()}.csv">Download the list of non-recorded appts</a>'
-    
-    st.sidebar.markdown(download_link, unsafe_allow_html=True)
-else:
-    if password:  # Only show the message if the password field is not empty
-        st.sidebar.error("Incorrect password. Please try again.")
+    if password == password_from_secrets:
+        csv_data = generate_csv(nonrecord_apts_df)
+        b64 = base64.b64encode(csv_data).decode()
+        download_link = f'<a href="data:file/csv;base64,{b64}" download="unrecorded_appts_{date.today()}.csv">Download the list of non-recorded appts</a>'
+        
+        st.sidebar.markdown(download_link, unsafe_allow_html=True)
     else:
-        st.sidebar.write("Enter the correct password to generate and download the list.")
+        if password:  # Only show the message if the password field is not empty
+            st.sidebar.error("Incorrect password. Please try again.")
+        else:
+            st.sidebar.write("Enter the correct password to generate and download the list.")
 
 
 
