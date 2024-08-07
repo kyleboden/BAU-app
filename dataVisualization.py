@@ -71,8 +71,10 @@ def data():
             "text/csv",
             key='download-csv'
         )
+    elif password:  # Only show the message if the password field is not empty
+        st.sidebar.error("Incorrect password. Please try again.")
     else:
-        st.sidebar.write("INCORRECT: Enter the correct password to enable the button.")
+        st.sidebar.write("Enter the correct password to enable the button.")
 
 
 
