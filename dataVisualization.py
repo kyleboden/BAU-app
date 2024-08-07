@@ -61,7 +61,7 @@ def data():
     password = st.sidebar.text_input("Enter password to generate the list:", type="password")
     
     # Check if the password is correct
-    if password == "your_password_here":  # Replace with your actual password
+    if password == "Ampsmart123!":  # Replace with your actual password
         st.sidebar.download_button(
             "Click to generate list of non-recorded appts",
             generate_csv(nonrecord_apts_df),
@@ -70,7 +70,7 @@ def data():
             key='download-csv'
         )
     else:
-        st.sidebar.write("Enter the correct password to enable the button.")
+        st.sidebar.write("INCORRECT: Enter the correct password to enable the button.")
 
 
 
