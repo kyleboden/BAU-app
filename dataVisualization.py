@@ -64,13 +64,20 @@ def data():
     
     # Check if the password is correct
     if password == password_from_secrets:
-        st.sidebar.download_button(
-            "Click to generate list of non-recorded appts",
-            generate_csv(nonrecord_apts_df),
-            f"unrecorded_appts_{date.today()}.csv",
-            "text/csv",
-            key='download-csv'
-        )
+        download_button_html = f"""
+        <a href="data:text/csv;charset=utf-8,{generate_csv(nonrecord_apts_df).decode()}" download="unrecorded_appts_{date.today()}.csv">
+            <button style="
+                background-color: green; 
+                color: white; 
+                padding: 10px 20px; 
+                border: none; 
+                border-radius: 5px;
+                cursor: pointer;">
+                Click to generate list of non-recorded appts
+            </button>
+        </a>
+        """
+        st.sidebar.markdown(download_button_html, unsafe_allow_html=True)
     elif password:  # Only show the message if the password field is not empty
         st.sidebar.error("Incorrect password. Please try again.")
     else:
