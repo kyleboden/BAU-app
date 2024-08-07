@@ -45,14 +45,12 @@ def data():
         t_dashboard(df_call_filt)
     elif data_options == 'Closer':
         c_dashboard(df_call_filt)
-        st.sidebar.markdown("---")
     elif data_options == 'Setter':
         s_dashboard(df_call_filt)
-        st.sidebar.markdown("---")
     elif data_options == 'Detailed Data':
         d_dashboard(df_call_filt, month_year_filt)
-        st.sidebar.markdown("---")
 
+    st.sidebar.markdown("---")
 
 
 
