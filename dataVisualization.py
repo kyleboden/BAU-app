@@ -56,12 +56,14 @@ def data():
 
     # Filtering DataFrame for non-recorded appointments
     nonrecord_apts_df = df[df['Closer Disposition'] == '']
+    password_from_secrets = st.secrets["general"]["password"]
+
     
     # Sidebar password input
     password = st.sidebar.text_input("Enter password to generate the list:", type="password")
     
     # Check if the password is correct
-    if password == "Ampsmart123!":  # Replace with your actual password
+    if password == password_from_secrets:
         st.sidebar.download_button(
             "Click to generate list of non-recorded appts",
             generate_csv(nonrecord_apts_df),
