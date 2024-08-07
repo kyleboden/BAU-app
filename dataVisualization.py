@@ -16,6 +16,9 @@ time_blocks = pd.date_range("08:00", "18:00", freq="60T").time
 time_blocks_str = [t.strftime("%H:%M:%S") for t in time_blocks]
 time_blocks = [pd.to_datetime(t).time() for t in time_blocks_str]
 
+def generate_csv(dataframe):
+    return dataframe.to_csv(index=False).encode('utf-8')
+    
 def data():
     df = pd.DataFrame(sheet.get_all_records())
     df_call_filt = df.copy()  # should be this if no other filters are applied
@@ -49,14 +52,25 @@ def data():
 
     st.sidebar.markdown("---")
 
+
+
+    # Filtering DataFrame for non-recorded appointments
     nonrecord_apts_df = df[df['Closer Disposition'] == '']
-    st.sidebar.download_button(
-        "Click to generate list of non-recorded appts",
-        generate_csv(nonrecord_apts_df),
-        f"unrecorded_appts_{date.today()}.csv",
-        "text/csv",
-        key='download-csv'
-    )
+    
+    # Sidebar password input
+    password = st.sidebar.text_input("Enter password to generate the list:", type="password")
+    
+    # Check if the password is correct
+    if password == "your_password_here":  # Replace with your actual password
+        st.sidebar.download_button(
+            "Click to generate list of non-recorded appts",
+            generate_csv(nonrecord_apts_df),
+            f"unrecorded_appts_{date.today()}.csv",
+            "text/csv",
+            key='download-csv'
+        )
+    else:
+        st.sidebar.write("Enter the correct password to enable the button.")
 
 
 
